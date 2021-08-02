@@ -15,6 +15,7 @@ import pickle
 import shutil
 import sys
 import time
+import numpy as np
 from htmd import interpret, process, jobtype
 from htmd.infrastructure import configure, factory
 
@@ -42,6 +43,7 @@ class Thread(object):
         self.terminated = False         # boolean indicating whether the thread has reached a termination criterion
         self.init_coords = ''
         self.sequences = []             # list of sequences (list of str) assigned to this thread for processing
+        self.current_sequence = ''      # todo: may change this but woudl be good for thread to track what it is currently processing
 
     # Remember in implementations of Thread methods that 'self' is a thread object, even though they may make calls to
     # methods of other types of objects (that therefore use 'self' to refer to non-Thread objects)
@@ -112,19 +114,15 @@ def init_threads(settings):
     jobtype = factory.jobtype_factory(settings.job_type)
 
     # todo: here, you should initialize threads as desired using something like this:
-    # partition peptides equitably between threads based on the number of nodes and peptide to be processed
-    nodes_avail = settings.nodes
+    # partition peptides equally as possible between threads based on the number of nodes and peptides to be processed
+    peptide_groups = [pep_array.tolist() for pep_array in np.array_split(settings.peptides,settings.nodes)]
 
-
-    for _ in range(10):     # todo: this is arbitrary, for illustration purposes
+    for i, peptide_group in enumerate(peptide_groups):     # todo: this is arbitrary, for illustration purposes
         thread = Thread()
-        thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
+        #thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
+        thread.sequences = peptide_group
+        thread.name = settings.name + '_' + str(i)
         allthreads.append(thread)
-
-        # force field
-        # peptide sequence
-        # box size for initial peptide equilibration
-        #
 
     return allthreads
 
