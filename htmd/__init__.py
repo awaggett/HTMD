@@ -1,6 +1,6 @@
 """
-isEE
-Automated in silico enzyme evolution based on optimizing transition state binding energy in unbiased MD simulations.
+htmd
+Automated .
 """
 
 from . import main

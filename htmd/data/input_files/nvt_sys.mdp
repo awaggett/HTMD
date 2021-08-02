@@ -1,0 +1,79 @@
+;
+;       GROMACS
+;       Input for NVT
+;
+;
+define = -DFLEXIBLE
+integrator              =  md-vv
+nsteps                  =  30000000
+dt                      =  0.004
+;
+;
+; Removing CM Translation and Rotation
+comm_mode               =  Linear
+nstcomm                 =  500
+; comm-grps             = nonfreeze
+periodic-molecules      = yes
+;
+;
+; Output Control
+nstlog                  = 50000
+nstenergy               = 50000
+nstxout                 = 0
+nstvout                 = 0
+nstxout-compressed      = 25000
+nstfout                 = 0
+;xtc-grps                = non-water
+;
+; Neighbour Searching
+cutoff-scheme           = Verlet
+nstlist                 = 10
+ns_type                 = grid
+pbc                     = xyz
+rlist                   = 1.30          ; cut-off distance for short range neighbors
+;
+; Electrostatic
+rcoulomb                = 1.3
+coulombtype             = PME
+fourierspacing          = 0.08
+ewald_rtol              = 1e-06
+ewald_geometry          = 3d
+;ewald_geometry         = 3dc
+;
+;
+;
+; VdW
+vdwtype                 = Cut-off
+vdw-modifier            = potential-switch
+rvdw-switch             = 1.0
+rvdw                    = 1.1           ; VDW cut-off
+DispCorr                = no
+;
+;
+; Constraints
+;constraints            = none
+constraints             = h-bonds
+constraint-algorithm    = lincs
+lincs_iter              = 1
+lincs-order              = 4
+;
+;
+; Pressure
+Pcoupl                  = no
+;
+; Temperature
+tcoupl                  = nose-hoover
+tc_grps                  = system
+tau_t                    = 4.0
+ref_t                    = 298
+;
+;
+; Initial Velocities
+gen_vel                 = no
+;gen_temp               = 298.0
+;gen_seed               = -1
+;
+; Freeze Groups
+freezegrps              = freeze
+freezedim               = Y Y Y
+

@@ -144,8 +144,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'isee.tex', 'isEE Documentation',
-     'isee', 'manual'),
+    (master_doc, 'htmd.tex', 'isEE Documentation',
+     'htmd', 'manual'),
 ]
 
 
@@ -154,7 +154,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'isee', 'isEE Documentation',
+    (master_doc, 'htmd', 'isEE Documentation',
      [author], 1)
 ]
 
@@ -165,8 +165,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'isee', 'isEE Documentation',
-     author, 'isee', 'Automated in silico enzyme evolution based on optimizing transition state binding energy in unbiased MD simulations.',
+    (master_doc, 'htmd', 'isEE Documentation',
+     author, 'htmd', 'Automated in silico enzyme evolution based on optimizing transition state binding energy in unbiased MD simulations.',
      'Miscellaneous'),
 ]
 

@@ -39,29 +39,32 @@ def configure(input_file, user_working_directory=''):
         # argparse.Namelist object, just for convenience.
 
         # Core settings required for all jobs
-        job_type: str
+        job_type: str = 'adsorption'    # 'adsorption is currently the only jobtype written
         batch_system: str
-        restart: bool
-        md_engine: str
+        restart: bool           # todo: figure out unpickling
+        md_engine: str = 'gromacs'      # 'gromacs' is currently the only MD engine adapted
         task_manager: str = 'simple'    # 'simple' is the only implementation I wrote
         working_directory: str
         overwrite: bool
 
         # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
+        # Settings for Adsorption jobs
+        peptides: os.path.dirname(os.path.realpath(__file__)) + '/'
 
         # Batch template settings
-        nodes: int = 1
+        nodes: int = 1                  # number of nodes will determine partitioning of threads
         ppn: int = 1
         mem: str = '4000mb'
         walltime: str = '02:00:00'
         solver: str = 'sander'
         extra: str = ''
 
+        # Batch template settings energy minimization (peptide or system)
+
+
         # File path settings
         path_to_input_files: str = os.path.dirname(os.path.realpath(__file__)) + '/data/input_files'
         path_to_templates: str = os.path.dirname(os.path.realpath(__file__)) + '/data/templates'    # todo: note that this is used below for establishing the Jinja2 environment
-
-        # etc, etc, ...
 
     # Import config file line-by-line using exec()
     lines = open(input_file, 'r').readlines()

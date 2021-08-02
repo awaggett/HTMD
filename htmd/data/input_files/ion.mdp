@@ -1,0 +1,32 @@
+;       Energy Minimization Script
+;
+;
+;cpp             = usr/bin/cpp   ; location of preprocessor
+constraints     = none
+integrator      = steep
+define = -DFLEXIBLE
+nsteps          = 200000
+;
+;       Energy Minimizing Parameters
+;
+emtol          = 200          ; convergence total force(kJ/mol/nm) is smaller than
+periodic-molecules      = yes
+emstep          = 0.001         ; initial step size (nm)
+nstxout-compressed      = 10
+ns_type         = grid
+rcoulomb        = 1.3           ; distance for coulomb cut-off
+coulombtype     = PME           ; electrostatics (Particle Mesh Ewald method)
+fourierspacing  = 0.06          ; max grid spacing when using PPPM or PME
+cutoff-scheme   =verlet
+;vdwtype        = Shift
+vdwtype         = Cut-off
+;vdw-modifier   = force-switch
+vdw-modifier   = potential-switch
+rlist           = 1.2          ; cut-off distance for short range neighbors
+rvdw-switch     = 1.0
+rvdw            = 1.1           ; VDW cut-off
+DispCorr        = no
+Tcoupl          = no            ; temperature coupling
+Pcoupl          = no            ; pressure coupling
+gen_vel         = no
+pbc             = xyz

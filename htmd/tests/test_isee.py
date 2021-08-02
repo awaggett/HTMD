@@ -1,5 +1,5 @@
 """
-Unit and regression test for the isee package.
+Unit and regression test for the htmd package.
 """
 
 # Import package, test suite, and other packages as needed
@@ -9,4 +9,4 @@ import sys
 
 def test_isee_imported():
     """Sample test, will always pass so long as import statement worked"""
-    assert "isee" in sys.modules
+    assert "htmd" in sys.modules

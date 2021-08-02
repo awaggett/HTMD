@@ -1,0 +1,74 @@
+;
+;       GROMACS
+;       Input for NPT
+;
+;
+;define                 =  -DDISRES
+define                  = -DFLEXIBLE
+integrator              =  md
+tinit                   = 0.000
+nsteps                  =  2500000
+dt                      =  0.002
+;
+;
+; Removing CM Translation and Rotation
+comm-mode               =  Linear
+nstcomm                 =  500
+; comm-grps             = nonfreeze
+periodic-molecules      = yes
+;
+;
+; Output Control
+nstlog                  = 25000
+nstenergy               = 25000
+nstxout                 = 0
+nstvout                 = 0
+nstxout-compressed      = 25000
+nstfout                 = 0
+;
+;
+; Neighbour Searching
+cutoff-scheme           = Verlet
+nstlist                 = 10
+ns_type                 = grid
+pbc                     = xyz
+rlist                   = 1.30          ; cut-off distance for short range neighbors
+;
+;
+; Electrostatic
+rcoulomb                = 1.30
+coulombtype             = PME
+fourierspacing          = 0.08
+ewald_rtol              = 1e-06
+ewald_geometry          = 3d
+;
+;
+;
+; VdW
+vdwtype                 = Cut-off
+vdw-modifier            = potential-switch
+rvdw-switch             = 1.0
+rvdw                    = 1.1           ; VDW cut-off
+DispCorr                = no
+;
+;
+;
+;
+; Pressure
+Pcoupl                  = berendsen
+tau-p                   = 1.0
+ref-p                   = 1.0
+pcoupltype              = isotropic
+compressibility         = 4.5e-5
+
+; Temperature
+Tcoupl                  = v-rescale
+tc_grps                  = system
+tau_t                    = 0.2
+ref_t                    = 298
+;
+;
+; Initial Velocities
+gen_vel                 = yes
+gen_temp                = 298
+gen_seed                = -1

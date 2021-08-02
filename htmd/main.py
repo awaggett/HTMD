@@ -2,7 +2,7 @@
 main.py
 Non-functional framework for managing jobs in isEE/atesa
 
-In comments and job structure throughout 'isEE' or 'isee' will appear; this is a hold-over from the original isEE code.
+In comments and job structure throughout 'isEE' or 'htmd' will appear; this is a hold-over from the original isEE code.
 THIS IS NOT isEE!
 
 This script handles the primary loop of building and submitting jobs in independent Threads, using the methods thereof 
@@ -15,8 +15,8 @@ import pickle
 import shutil
 import sys
 import time
-from isee import interpret, process
-from isee.infrastructure import factory, configure
+from htmd import interpret, process, jobtype
+from htmd.infrastructure import configure, factory
 
 class Thread(object):
     """
@@ -41,6 +41,7 @@ class Thread(object):
         self.jobids = []                # list of jobids associated with the present step of this thread
         self.terminated = False         # boolean indicating whether the thread has reached a termination criterion
         self.init_coords = ''
+        self.sequences = []             # list of sequences (list of str) assigned to this thread for processing
 
     # Remember in implementations of Thread methods that 'self' is a thread object, even though they may make calls to
     # methods of other types of objects (that therefore use 'self' to refer to non-Thread objects)
@@ -83,7 +84,7 @@ def init_threads(settings):
 
     In the case where settings.restart == True, this involves unpickling restart.pkl; otherwise, brand new objects are
     produced in accordance with settings.job_type (aimless_shooting, committor_analysis, equilibrium_path_sampling, or
-    isee).
+    htmd).
 
     Parameters
     ----------
@@ -111,11 +112,20 @@ def init_threads(settings):
     jobtype = factory.jobtype_factory(settings.job_type)
 
     # todo: here, you should initialize threads as desired using something like this:
+    # partition peptides equitably between threads based on the number of nodes and peptide to be processed
+    nodes_avail = settings.nodes
+
+
     for _ in range(10):     # todo: this is arbitrary, for illustration purposes
         thread = Thread()
         thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
         allthreads.append(thread)
-        
+
+        # force field
+        # peptide sequence
+        # box size for initial peptide equilibration
+        #
+
     return allthreads
 
 # This function is used to cancel submitted jobs in the event that the parent python program crashes
@@ -199,7 +209,8 @@ def main(settings):
 
     running = allthreads.copy()     # to be pruned later by thread.process()
     termination_criterion = False   # initialize global termination criterion boolean
-    jobtype = factory.jobtype_factory(settings.job_type)    # initialize jobtype
+    #jobtype = factory.jobtype_factory(settings.job_type)    # initialize jobtype
+    jobtype = jobtype.Adsorption()
 
     # Initialize threads with first process step
     try:
