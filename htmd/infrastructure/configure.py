@@ -50,7 +50,7 @@ def configure(input_file, user_working_directory=''):
         # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
         # Settings for Adsorption jobs
         name: str                       # identify job names
-        peptides: typing.List[typing.List[str]] = []
+        peptides: typing.List[typing.List[str]] = [] # todo: decide on input format of peptide list
         peptide_box_x: int = 6          # dimension of box to relax peptide in nm (default 6x6x6)
         peptide_box_y: int = 6
         peptide_box_z: int = 6
@@ -71,7 +71,7 @@ def configure(input_file, user_working_directory=''):
         # File path settings
         path_to_input_files: str = os.path.dirname(os.path.realpath(__file__)) + '/data/input_files'
         path_to_templates: str = os.path.dirname(os.path.realpath(__file__)) + '/data/templates'    # todo: note that this is used below for establishing the Jinja2 environment
-        path_to_sequences: os.path.dirname(os.path.realpath(__file__)) + '/data/input_files/sequences.txt'
+        #path_to_sequences: os.path.dirname(os.path.realpath(__file__)) + '/data/input_files/sequences.txt'
 
     # Import config file line-by-line using exec()
     lines = open(input_file, 'r').readlines()
