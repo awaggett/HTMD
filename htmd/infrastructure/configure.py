@@ -55,7 +55,7 @@ def configure(input_file, user_working_directory=''):
         peptide_box_y: int = 6
         peptide_box_z: int = 6
         force_field: str = 'charmm36-nov2016-repart'
-
+        initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
 
         # Batch template settings
         nodes: int = 1                  # number of nodes will determine partitioning of threads
