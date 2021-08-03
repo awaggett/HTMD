@@ -47,16 +47,6 @@ def configure(input_file, user_working_directory=''):
         working_directory: str
         overwrite: bool
 
-        # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
-        # Settings for Adsorption jobs
-        name: str                       # identify job names
-        peptides: typing.List[typing.List[str]] = [] # todo: decide on input format of peptide list
-        peptide_box_x: int = 6          # dimension of box to relax peptide in nm (default 6x6x6)
-        peptide_box_y: int = 6
-        peptide_box_z: int = 6
-        force_field: str = 'charmm36-nov2016-repart'
-        initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
-
         # Batch template settings
         nodes: int = 1                  # number of nodes will determine partitioning of threads
         ppn: int = 1
@@ -65,13 +55,22 @@ def configure(input_file, user_working_directory=''):
         solver: str = 'sander'
         extra: str = ''
 
-        # Batch template settings energy minimization (peptide or system)
-
-
         # File path settings
         path_to_input_files: str = os.path.dirname(os.path.realpath(__file__)) + '/data/input_files'
-        path_to_templates: str = os.path.dirname(os.path.realpath(__file__)) + '/data/templates'    # todo: note that this is used below for establishing the Jinja2 environment
-        #path_to_sequences: os.path.dirname(os.path.realpath(__file__)) + '/data/input_files/sequences.txt'
+        path_to_templates: str = os.path.dirname(os.path.realpath(
+            __file__)) + '/data/templates'  # todo: note that this is used below for establishing the Jinja2 environment
+        # path_to_sequences: os.path.dirname(os.path.realpath(__file__)) + '/data/input_files/sequences.txt'
+
+        # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
+        # Settings for Adsorption jobs
+        name: str                       # identify job names
+        peptide_box_dim: int = 6        # dimensions of box to relax peptide in nm (default 6x6x6)
+        force_field: str = 'charmm36-nov2016-repart'
+        initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
+        peptides: typing.List[typing.List[str]] = []
+
+        # Batch template settings energy minimization (peptide or system)
+
 
     # Import config file line-by-line using exec()
     lines = open(input_file, 'r').readlines()
@@ -89,11 +88,6 @@ def configure(input_file, user_working_directory=''):
     config_dict.update(locals())
     settings = argparse.Namespace()
     settings.__dict__.update(Settings(**config_dict))
-
-    # Write to settings namespace peptides based on path_to_sequence
-    if settings.job_type == 'adsorption':
-        peptides = open(settings.path_to_sequences, 'r').readlines()
-        settings.peptides = [peptide.split() for peptide in peptides]
 
     # Override working directory if provided with user_working_directory
     if user_working_directory:

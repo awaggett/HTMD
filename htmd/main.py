@@ -42,8 +42,9 @@ class Thread(object):
         self.jobids = []                # list of jobids associated with the present step of this thread
         self.terminated = False         # boolean indicating whether the thread has reached a termination criterion
         self.init_coords = ''
-        self.sequences = []             # list of sequences (list of str) assigned to this thread for processing
-        self.current_sequence = ''      # todo: may change this but woudl be good for thread to track what it is currently processing
+        self.peptides = []              # list of sequences (list of str) assigned to this thread for processing
+        self.current_sequence = ''      # todo: may change this but would be good for thread to track what it is currently processing
+        self.current_type = ''          # str indicating job type for the present step of this thread
 
     # Remember in implementations of Thread methods that 'self' is a thread object, even though they may make calls to
     # methods of other types of objects (that therefore use 'self' to refer to non-Thread objects)
@@ -115,13 +116,16 @@ def init_threads(settings):
 
     # todo: here, you should initialize threads as desired using something like this:
     # partition peptides equally as possible between threads based on the number of nodes and peptides to be processed
-    peptide_groups = [pep_array.tolist() for pep_array in np.array_split(settings.peptides,settings.nodes)]
+    peptide_groups = [pep_array.tolist() for pep_array in np.array_split(settings.peptides, settings.nodes)]
 
     for i, peptide_group in enumerate(peptide_groups):     # todo: this is arbitrary, for illustration purposes
         thread = Thread()
         #thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
-        thread.sequences = peptide_group
+        thread.peptides = peptide_group
         thread.name = settings.name + '_' + str(i)
+
+        jobtype.update_history(thread, settings, **{'initialize': True, 'add_peptides': peptide_group}) # todo: determine if any other kwargs needed
+
         allthreads.append(thread)
 
     return allthreads
@@ -213,6 +217,7 @@ def main(settings):
     # Initialize threads with first process step
     try:
         for thread in allthreads:
+            # todo: change if not thread.history.traj (instead check if thread.history.peptides matches original thread.peptides?)
             if not thread.history.trajs:    # if there have been no steps in this thread yet
                 jobtype.algorithm(thread, allthreads, settings)
             running = thread.process(running, allthreads, settings)

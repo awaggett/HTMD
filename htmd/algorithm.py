@@ -151,3 +151,6 @@ class Algorithm(abc.ABC):
 
         def get_next_step(self, thread, allthreads, settings):
             pass
+
+
+class Adsorption(Algorithm):

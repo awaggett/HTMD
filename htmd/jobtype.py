@@ -212,18 +212,18 @@ class Adsorption(JobType):
     """
 
     def get_initial_coordinates(self, settings):
-        list_to_return = []
-
-        return list_to_return
+        pass
 
     def get_next_step(self, thread, settings):
-        if thread.history.muts and thread.history.muts[-1]:
-            return '_'.join(thread.history.muts[-1])
-        else:
-            return 'unmutated'
+        # todo: will probably need to tweak this but a general idea
+        if thread.current_type == '':
+            thread.current_type = 'peptide'
+        elif thread.current_type = 'peptide':
+            thread.current_type = 'system'
 
     def get_input_file(self, thread, settings):
         return settings.path_to_input_files + '/' + settings.job_type + '_' + settings.md_engine + '.in'
+        # todo: check this is applicable
 
     def get_batch_template(self, settings):
         templ = settings.md_engine + '_' + settings.batch_system + '.tpl'
@@ -231,127 +231,64 @@ class Adsorption(JobType):
             return templ
         else:
             raise FileNotFoundError('cannot find required template file: ' + templ)
+        # todo: check this is applicable
 
     def get_struct(self, thread):
         return thread.history.inpcrd[-1], thread.history.tops[-1]
+        # todo: check this is applicable
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
             if kwargs['initialize']:
                 thread.history = argparse.Namespace()
-                thread.history.inpcrd = []  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
                 thread.history.tops = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.muts = []  # list of lists of strings describing mutations tested; updated by algorithm
-                thread.history.score = []  # list of scores; updated by analyze()
                 thread.history.timestamps = []  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
-            if not os.path.exists(
-                    settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?
-                pickle.dump(thread.history, open(settings.working_directory + '/algorithm_history.pkl',
+            #if not os.path.exists(
+            #        settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?
+            #    pickle.dump(thread.history, open(settings.working_directory + '/algorithm_history.pkl',
                                                  'wb'))  # an empty thread.history template
-            if 'inpcrd' in kwargs.keys():
-                thread.history.inpcrd.append(kwargs['inpcrd'])
+            if 'add_peptides' in kwargs.keys():
+                thread.history.peptides.extend(kwargs['add_peptides'])
         else:  # thread.history should already exist
-            if 'nc' in kwargs.keys():
-                if len(thread.history.trajs) < thread.suffix + 1:
-                    thread.history.trajs.append([])
-                    if len(thread.history.trajs) < thread.suffix + 1:
-                        raise IndexError('history.prod_trajs is the wrong length for thread: ' +
-                                         thread.history.inpcrd[0] + '\nexpected length: ' + str(thread.suffix + 1) +
-                                         ', but it is currently: ' + str(thread.history.trajs))
-                thread.history.trajs[thread.suffix].append(kwargs['nc'])
+            pass
+            # todo: will probably need to put something here that removes peptides from thread.history once first process step is complete
 
     def analyze(self, thread, settings):
-        if not settings.SPOOF:  # default behavior
-            if settings.storage_directory:  # move a 'dry' copy to storage, if we have a storage directory
-                dry_traj, dry_top = utilities.strip_and_store(thread.history.trajs[-1][0], thread.history.tops[-1],
-                                                              settings)  # I honestly have no idea why thread.history.trajs[-1] is a list here when it was a string just before?
-                thread.history.score.append(utilities.lie(dry_traj, dry_top, settings))
-
-                # Write results in a human-readable format
-                if not os.path.exists(settings.storage_directory + '/results.out'):
-                    open(settings.storage_directory + '/results.out', 'w').close()
-
-                with open(settings.storage_directory + '/results.out', 'a') as f:
-                    f.write(str(thread.history.muts[-1]) + ': ' + str(thread.history.score[-1]) + '\n')
-
-            else:
-                thread.history.score.append(utilities.lie(thread.history.trajs[-1], thread.history.tops[-1], settings))
-        else:  # spoof behavior
-            thread.history.score.append(utilities.score_spoof(settings.seq, settings.rmsd_covar, settings))
+        pass
 
     def algorithm(self, thread, allthreads, settings):
-        # Get next mutation to apply from the desired algorithm, or else terminate
         this_algorithm = factory.algorithm_factory(settings.algorithm)
 
-        if not thread.history.trajs:  # if this is the first step in this thread
+        # todo: write if statement based on jobtype.current (=petide or system)
+        if thread.jobtype.current == 'peptide':  # if this is the first step in this thread
             next_step = this_algorithm.get_first_step(thread, allthreads, settings)
         else:
             next_step = this_algorithm.get_next_step(thread, allthreads, settings)
 
-        if next_step == 'WT':  # do nothing, correct structure is already set in history.tops and history.inpcrd
-            # thread.history.muts.append([])  # empty muts entry, for consistency in indexing
-            next_step = ['WT']
+        # todo: implement algorithm here or actually in algorithm class?
+        if thread.current_type == 'peptide':
+            pass
+            # series of commands prior to job submission
 
-        elif next_step == 'IDLE':
-            thread.idle = True
-            return False  # False: do not globally terminate
+        elif thread.current_type == 'system':
+            pass
+            # series of commands prior to job submission
 
-        thread.idle = False  # explicitly reset idle to False whenever we get to this step
-
-        if next_step == 'TER':  # algorithm says thread termination
-            thread.terminated = True
-            return False  # False: do not globally terminate
-
-        # If we get here, we have a new mutant (or WT) to direct the thread to build and simulate
-        thread.history.muts.append(next_step)
-        thread.history.timestamps.append(time.time())
-
-        # Perform desired mutation
-        # todo: implement possibility of mutating using something other than initial coordinates/topology as a base?
-        if '/' in settings.init_topology:  # todo: this shouldn't be necessary because it should already be done in main.init_threads
-            settings.init_topology = settings.init_topology[settings.init_topology.rindex('/') + 1:]
-        initial_coordinates_to_mutate = settings.initial_coordinates[0]
-        if '/' in initial_coordinates_to_mutate:
-            initial_coordinates_to_mutate = initial_coordinates_to_mutate[
-                                            initial_coordinates_to_mutate.rindex('/') + 1:]
-        if next_step == ['WT']:
-            mutations = ['']  # need to call mutate for WT to apply ts_bonds to the topology file
-        else:
-            mutations = next_step
-        new_inpcrd, new_top = utilities.mutate(initial_coordinates_to_mutate, settings.init_topology, mutations,
-                                               initial_coordinates_to_mutate + '_' + '_'.join(next_step), settings)
-
+        # todo: update history with what needs updating... likely different files that have been created and will need to be accessed for batch submission
         # Update history and return
-        thread.history.inpcrd.append(new_inpcrd)
-        thread.history.tops.append(new_top)
-        thread.suffix += 1
 
-        if not thread.history.trajs:  # if this is the first step in this thread
-            thread.history.inpcrd = [thread.history.inpcrd[-1]]
-            thread.history.tops = [thread.history.tops[-1]]
-            thread.history.muts = [thread.history.muts[-1]]
-            thread.history.timestamps = [thread.history.timestamps[-1]]
-            thread.suffix = 0
+        # todo: consider what is stored as the final element in a history list - indicate what is currently happening with the thread
+        if thread.jobtype.current == 'peptide':  # if this is the first step in this thread
+            #thread.history.tops = [thread.history.tops[-1]]
+            pass
 
         return False  # False: do not terminate
 
     def gatekeeper(self, thread, allthreads, settings):
-        # First, check whether this thread is intentionally idling and if so, let the algorithm guide us
-        if thread.idle:
-            # We should be sure at this point that something hasn't gone wrong and idled ALL the threads...
-            if all([this_thread.idle for this_thread in allthreads]):
-                # Reevaluate idle for all threads
-                this_algorithm = factory.algorithm_factory(settings.algorithm)
-                for thread in allthreads:
-                    thread.idle = this_algorithm.reevaluate_idle(thread, allthreads)
-
-                # If problem persists...
-                if all([this_thread.idle for this_thread in allthreads]):
-                    raise RuntimeError('all threads are in an idle state, which means something must have gone wrong. '
-                                       'Inspect the restart.pkl file for errors.')
-            this_algorithm = factory.algorithm_factory(settings.algorithm)
-            return this_algorithm.reevaluate_idle(thread, allthreads)
+        # todo: will need to consider adding a function w/in gatekeeper that can identify an adsorption event and bring about early termination
+        # todo: may not be necessary if it is decided that nvt will only be running for a short amount of time anyway
 
         # If job for this thread has status 'C'ompleted/'C'anceled...
         if thread.get_status(0, settings) == 'C':  # index 0 because there is only ever one element in thread.jobids
