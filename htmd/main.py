@@ -123,6 +123,7 @@ def init_threads(settings):
         #thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
         thread.peptides = peptide_group
         thread.name = settings.name + '_' + str(i)
+        thread.current_type = '' # todo: can maybe just start with initializing the current type as 'peptide'?
 
         jobtype.update_history(thread, settings, **{'initialize': True, 'add_peptides': peptide_group}) # todo: determine if any other kwargs needed
 
@@ -211,8 +212,7 @@ def main(settings):
 
     running = allthreads.copy()     # to be pruned later by thread.process()
     termination_criterion = False   # initialize global termination criterion boolean
-    #jobtype = factory.jobtype_factory(settings.job_type)    # initialize jobtype
-    jobtype = jobtype.Adsorption()
+    jobtype = factory.jobtype_factory(settings.job_type)    # initialize jobtype
 
     # Initialize threads with first process step
     try:

@@ -244,16 +244,21 @@ class Adsorption(JobType):
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
                 thread.history.tops = []  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.coords = [] # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.timestamps = []  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
             #if not os.path.exists(
             #        settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?
             #    pickle.dump(thread.history, open(settings.working_directory + '/algorithm_history.pkl',
-                                                 'wb'))  # an empty thread.history template
+            #                                     'wb'))  # an empty thread.history template
             if 'add_peptides' in kwargs.keys():
                 thread.history.peptides.extend(kwargs['add_peptides'])
         else:  # thread.history should already exist
             pass
             # todo: will probably need to put something here that removes peptides from thread.history once first process step is complete
+
+            # todo: idea to have thread.history.topology/coord/etc as dictionary objects for each peptide in thread
+            # todo: but what if peptides repeat, maybe have list object instead and index for current peptide
+            # todo: Tucker had last element in list represent the current action of thread, I may need a list of lists for each peptide?
 
     def analyze(self, thread, settings):
         pass
@@ -261,7 +266,7 @@ class Adsorption(JobType):
     def algorithm(self, thread, allthreads, settings):
         this_algorithm = factory.algorithm_factory(settings.algorithm)
 
-        # todo: write if statement based on jobtype.current (=petide or system)
+        # todo: write if statement based on jobtype.current (=petide or system) may need to have current_type == '' then next step is peptide?
         if thread.jobtype.current == 'peptide':  # if this is the first step in this thread
             next_step = this_algorithm.get_first_step(thread, allthreads, settings)
         else:

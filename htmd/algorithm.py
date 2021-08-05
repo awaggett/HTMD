@@ -48,6 +48,7 @@ class Algorithm(abc.ABC):
             algorithm_history = argparse.Namespace()
         else:
             algorithm_history = pickle.load(open(history_file, 'rb'))
+        # todo: check that this still applies
 
 
         def merge_namespace(current, new):
@@ -83,6 +84,7 @@ class Algorithm(abc.ABC):
 
         lock.release()
         return algorithm_history
+        # todo: check that this still applies
 
     @abc.abstractmethod
     def get_first_step(self, thread, allthreads, settings):
@@ -154,3 +156,14 @@ class Algorithm(abc.ABC):
 
 
 class Adsorption(Algorithm):
+    """
+    Adapter class for algorithm that:
+        - Builds peptide using Amber TEaP
+        - Minimizes and equilibrates peptide using Gromacs
+        - Grafts relaxed peptide onto user's choice of surface
+        - Minimizes and equilibrates peptide-surface system
+    """
+
+    def get_first_strep(self, thread, settings):
+        # build peptide according to sequence. utilities.build_peptide
+        # edit amber pdb for gromacs. utilities.edit_pdb
