@@ -9,7 +9,7 @@ import sys
 import pickle
 import shutil
 import warnings
-from isee.infrastructure import factory
+from htmd_.infrastructure import factory
 
 def process(thread, running, allthreads, settings, inp_override=''):
     """
@@ -48,25 +48,31 @@ def process(thread, running, allthreads, settings, inp_override=''):
 
     batchfiles = []         # initialize list of batch files to submit
     jobtype = factory.jobtype_factory(settings.job_type)    # get jobtype for calling jobtype.update_history
-    this_inpcrd, this_top = jobtype.get_struct(thread)
+    this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread) # todo: needed for batch job = system.gro, topol, system.ndx
+    # todo: actually, will probably just need the run file (grompp prior to submission)
     name = thread.current_name
-    inp = jobtype.get_input_file(thread, settings)
+    inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
 
+    # todo: where is this get_template method defined?
     template = settings.env.get_template(thread.get_batch_template(settings))
 
     # todo: replace this kwargs with something appropriate for your batch template
     these_kwargs = { 'name': thread.name + '_' + name,
                      'nodes': eval('settings.nodes'),
+                     'account': eval('settings.account'),
+                     'partition': eval('settings.partition'),
                      'taskspernode': eval('settings.ppn'),
-                     'walltime': eval('settings.walltime'),
+                     'time': eval('settings.time'),
                      'mem': eval('settings.mem'),
-                     'solver': eval('settings.solver'),
-                     'inp': inp,
-                     'out': thread.name + '_' + name + '.out',
-                     'prmtop': this_top,
-                     'inpcrd': this_inpcrd,
-                     'rst': thread.name + '_' + name + '.rst7',
-                     'nc': thread.name + '_' + name + '.nc',
+                     #'solver': eval('settings.solver'),
+                     #'inp': inp,
+                     #'out': thread.name + '_' + name + '.out',
+                     'topol.top': this_top,
+                     'system.gro': this_inpcrd,
+                     # todo: can just make a dummy index file for peptide or have two batch scripts based on thread.current_jobtype
+                     'system.ndx': this_index,
+                     #'rst': thread.name + '_' + name + '.rst7',
+                     #'nc': thread.name + '_' + name + '.nc',
                      'working_directory': settings.working_directory,
                      'extra': eval('settings.extra') }
 

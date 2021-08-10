@@ -216,17 +216,26 @@ class Adsorption(JobType):
 
     def get_next_step(self, thread, settings):
         # todo: will probably need to tweak this but a general idea
-        if thread.current_type == '':
-            thread.current_type = 'peptide'
-        elif thread.current_type = 'peptide':
-            thread.current_type = 'system'
+        if thread.current_type == '': # this is the first step
+            thread.current_type = 'em'
+        elif thread.current_type == 'em':
+            thread.current_type = 'npt'
+        elif thread.current_type == 'npt':
+            thread.current_type = 'nvt'
+        else: # move onto next peptide
+            thread.current_type = 'em'
+        # todo: need to decide how it recognizes thread finished
+        # todo: should this return something that will be equal to the thread.name in process.py?
+        # todo: may be able to overlap some of this naming if essentially doing the same thing for nvt and npt peptide vs system
+        return thread.current_type
 
     def get_input_file(self, thread, settings):
         return settings.path_to_input_files + '/' + settings.job_type + '_' + settings.md_engine + '.in'
         # todo: check this is applicable
 
     def get_batch_template(self, settings):
-        templ = settings.md_engine + '_' + settings.batch_system + '.tpl'
+        # todo: may change this template definition back.../ need to add more templates for system
+        templ = settings.md_engine + '_' + settings.batch_system + '_' + thread.current_type + '.tpl'
         if os.path.exists(settings.path_to_templates + '/' + templ):
             return templ
         else:
@@ -234,65 +243,116 @@ class Adsorption(JobType):
         # todo: check this is applicable
 
     def get_struct(self, thread):
-        return thread.history.inpcrd[-1], thread.history.tops[-1]
-        # todo: check this is applicable
+        if settings.batch_system == 'gromacs':
+            return thread.history.runfiles[-1]
+        else:
+            return thread.history.coords[-1], thread.history.tops[-1], thread.history.index[-1]
+        # todo: check this is applicable - may only need run file
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
             if kwargs['initialize']:
                 thread.history = argparse.Namespace()
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
+                #thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
                 thread.history.tops = []  # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.coords = [] # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.indices = [] # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.runfiles = [] # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.timestamps = []  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
-            #if not os.path.exists(
+            #if not os.path.exists( # todo: may not need timestamps?
             #        settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?
             #    pickle.dump(thread.history, open(settings.working_directory + '/algorithm_history.pkl',
             #                                     'wb'))  # an empty thread.history template
-            if 'add_peptides' in kwargs.keys():
-                thread.history.peptides.extend(kwargs['add_peptides'])
+
+            # todo: this is probably not necessary. do need to update history.peptides for which have been processed
+            #if 'add_peptides' in kwargs.keys():
+            #    thread.history.peptides.extend(kwargs['add_peptides'])
         else:  # thread.history should already exist
             pass
             # todo: will probably need to put something here that removes peptides from thread.history once first process step is complete
 
-            # todo: idea to have thread.history.topology/coord/etc as dictionary objects for each peptide in thread
-            # todo: but what if peptides repeat, maybe have list object instead and index for current peptide
-            # todo: Tucker had last element in list represent the current action of thread, I may need a list of lists for each peptide?
 
     def analyze(self, thread, settings):
         pass
 
-    def algorithm(self, thread, allthreads, settings):
+    def algorithm(self, thread, allthreads, running, settings):
         this_algorithm = factory.algorithm_factory(settings.algorithm)
 
         # todo: write if statement based on jobtype.current (=petide or system) may need to have current_type == '' then next step is peptide?
-        if thread.jobtype.current == 'peptide':  # if this is the first step in this thread
-            next_step = this_algorithm.get_first_step(thread, allthreads, settings)
-        else:
-            next_step = this_algorithm.get_next_step(thread, allthreads, settings)
+#        if thread.current_type == '':  # if this is the first step in this thread
+#            next_step = this_algorithm.get_first_step(thread, allthreads, settings) # todo: may not need a return. can just update type
+#        else:
+#            next_step = this_algorithm.get_next_step(thread, allthreads, settings)
+        thread.current_type = thread.get_next_step(thread, settings)
+
+        # if current system is only peptide
+        if thread.system == 'peptide':
+
+            # if next batch submission will be energy minimization
+            if thread.current_type == 'em':
+
+                # build peptide in Amber TLEaP. This will add coord to history
+                tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
+
+                # make pdb compatible with gromacs
+                utilities.edit_pdb(tleap_pdb)
+
+                # convert pdb to gro file
+                utilities.pdb2gmx(thread, settings)
+
+
+
+                pass
+            elif thread.current_type == 'npt':
+                pass
+            else: # thread.tyep == 'nvt'
+                pass
+
+        else: # thread.system == 'system' (peptide and surface system)
+
+            # if next batch submission will be energy minimization
+            if thread.type == 'em':
+                pass
+            elif thread.type == 'npt':
+                pass
+            else:  # thread.tyep == 'nvt'
+                pass
 
         # todo: implement algorithm here or actually in algorithm class?
-        if thread.current_type == 'peptide':
-            pass
-            # series of commands prior to job submission
-
-        elif thread.current_type == 'system':
-            pass
-            # series of commands prior to job submission
-
-        # todo: update history with what needs updating... likely different files that have been created and will need to be accessed for batch submission
-        # Update history and return
-
         # todo: consider what is stored as the final element in a history list - indicate what is currently happening with the thread
-        if thread.jobtype.current == 'peptide':  # if this is the first step in this thread
-            #thread.history.tops = [thread.history.tops[-1]]
+        if next_step == 'peptide_em': # if this is the first step in this thread
+            # thread.history.tops = [thread.history.tops[-1]]
+            # run algorithm to build peptide in tleap
+            # center, grow, solavte, ionize
+            # grompp a run file (maybe do this through the gromacs MD engine?
             pass
+            # series of commands prior to job submission
+        elif next_step == 'peptide_npt':
+            # grompp a run file for npt run
+            pass
+        elif next_step == 'peptide_nvt':
+            # grompp a run file for nvt run
+            pass
+        elif next_step == 'system_em':
+            # isolate peptide from nvt.gro (need to check with Xin on how to do this w/o vmd)
+            # graft peptide onto slab, solvate, ionize
+            # grompp runfile for em
+            pass
+        elif next_step == 'system_npt':
+            # grompp a run file for npt
+            pass
+        elif next_step == 'system_nvt':
+            # grompp a run file for nvt
+            pass
+            # series of commands prior to job submission
+    # todo: update history with what needs updating... likely different files that have been created and will need to be accessed for batch submission
 
-        return False  # False: do not terminate
+
+        return running # todo: what will jobtype.algorithm return?
 
     def gatekeeper(self, thread, allthreads, settings):
-        # todo: will need to consider adding a function w/in gatekeeper that can identify an adsorption event and bring about early termination
+        # todo: consider adding a function w/in gatekeeper that can identify an adsorption event and bring about early termination
         # todo: may not be necessary if it is decided that nvt will only be running for a short amount of time anyway
 
         # If job for this thread has status 'C'ompleted/'C'anceled...

@@ -132,28 +132,6 @@ class Algorithm(abc.ABC):
 
         pass
 
-    class PeptideBuild(Algorithm):
-        """
-        Adapter class for the "algorithm" that...
-        """
-
-        def get_first_step(self, thread, allthreads, settings):
-            pass
-
-        def get_next_step(self, thread, allthreads, settings):
-            pass
-
-    class SystemBuild(Algorithm):
-        """
-        Adapter class for the "algorithm" that...
-        """
-
-        def get_first_step(self, thread, allthreads, settings):
-            pass
-
-        def get_next_step(self, thread, allthreads, settings):
-            pass
-
 
 class Adsorption(Algorithm):
     """
@@ -164,6 +142,7 @@ class Adsorption(Algorithm):
         - Minimizes and equilibrates peptide-surface system
     """
 
-    def get_first_strep(self, thread, settings):
+    def get_first_step(self, thread, settings):
         # build peptide according to sequence. utilities.build_peptide
         # edit amber pdb for gromacs. utilities.edit_pdb
+        

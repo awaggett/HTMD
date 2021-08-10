@@ -3,7 +3,7 @@ Unit and regression test for the htmd package.
 """
 
 # Import package, test suite, and other packages as needed
-import isee
+import htmd_
 import pytest
 import sys
 

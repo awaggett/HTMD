@@ -12,7 +12,7 @@ class MDEngine(abc.ABC):
     """
     Abstract base class for molecular dynamics engines.
 
-    Implements methods for all of the engine-specific tasks that isEE might need.
+    Implements methods for all of the engine-specific tasks that htmd might need.
 
     """
 

@@ -1,0 +1,18 @@
+; Include forcefield parameters
+#force_field
+#protein_ff
+
+; Include water topology
+#include "./charmm36-nov2016-repart.ff/spce_part.itp"
+
+; Include topology for ions
+#include "./charmm36-nov2016-repart.ff/ions.itp"
+
+[ system ]
+; Name
+sys_name
+
+[ molecules ]
+; Compound        #mols
+protein_name
+

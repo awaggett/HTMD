@@ -10,11 +10,11 @@ from . import process
 from . import utilities
 from . import algorithm
 from . import initialize_charges
-from isee.infrastructure import configure
-from isee.infrastructure import batchsystem
-from isee.infrastructure import factory
-from isee.infrastructure import mdengine
-from isee.infrastructure import taskmanager
+from htmd_.infrastructure import configure
+from htmd_.infrastructure import batchsystem
+from htmd_.infrastructure import factory
+from htmd_.infrastructure import mdengine
+from htmd_.infrastructure import taskmanager
 
 # Handle versioneer
 from ._version import get_versions

@@ -41,7 +41,7 @@ class AdaptSimple(TaskManager):
     """
 
     def submit_batch(self, filename, settings):
-        from isee.infrastructure import factory
+        from htmd.infrastructure import factory
 
         batchsystem = factory.batchsystem_factory(settings.batch_system)
         command = batchsystem.get_submit_command().replace('{file}', filename)

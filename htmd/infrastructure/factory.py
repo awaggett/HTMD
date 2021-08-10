@@ -7,7 +7,7 @@ from htmd import algorithm
 #from htmd import stabilitymodel
 from htmd.infrastructure import mdengine
 from htmd.infrastructure import batchsystem
-#from htmd.infrastructure import taskmanager
+from htmd.infrastructure import taskmanager
 
 def mdengine_factory(mdengine_toolkit):
     """
@@ -24,7 +24,7 @@ def mdengine_factory(mdengine_toolkit):
 
     mdengine_toolkit = mdengine_toolkit.lower()
 
-    mdengine_toolkits = {'amber': mdengine.AdaptGromacs()}
+    mdengine_toolkits = {'gromacs': mdengine.AdaptGromacs()} # todo: do I need an MDengine?
 
     if mdengine_toolkit not in mdengine_toolkits.keys():
         raise ValueError('unsupported MDEngine name: ' + mdengine_toolkit)

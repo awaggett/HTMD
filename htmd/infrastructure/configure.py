@@ -52,7 +52,6 @@ def configure(input_file, user_working_directory=''):
         ppn: int = 1
         mem: str = '4000mb'
         walltime: str = '02:00:00'
-        solver: str = 'sander'
         extra: str = ''
 
         # File path settings
@@ -68,6 +67,8 @@ def configure(input_file, user_working_directory=''):
         force_field: str = 'charmm36-nov2016-repart'
         initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
         peptides: typing.List[typing.List[str]] = []
+        surface_ff: str                 # .itp force field file for surface
+        surface_coord: str              # coordinate file for surface
 
         # Batch template settings energy minimization (peptide or system)
 
