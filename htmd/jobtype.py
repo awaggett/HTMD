@@ -235,7 +235,7 @@ class Adsorption(JobType):
 
     def get_batch_template(self, settings):
         # todo: may change this template definition back.../ need to add more templates for system
-        templ = settings.md_engine + '_' + settings.batch_system + '_' + thread.current_type + '.tpl'
+        templ = settings.md_engine + '_' + settings.batch_system + '_' + thread.system + '_' + thread.current_type + '.tpl'
         if os.path.exists(settings.path_to_templates + '/' + templ):
             return templ
         else:
@@ -301,53 +301,52 @@ class Adsorption(JobType):
                 # convert pdb to gro file
                 utilities.pdb2gmx(thread, settings)
 
+                # edit protein .itp file and populate topology base file
+                # todo: how to do this systematically
 
+                # set box size and center peptide
+                utilities.center_peptide(thread, settings)
 
-                pass
+                # solvate box
+                utilities.solvate(thread, settings)
+
+                # grompp ion runfile and add ions
+                utilities.grompp_ion_runfile(thread, settings)
+                utilities.genion(thread, settings)
+
+                # grompp run file
+                # todo: do i want to have them all together like that...?
+
             elif thread.current_type == 'npt':
+
+                # grompp run file
                 pass
+
             else: # thread.tyep == 'nvt'
+
+                # grompp run file
                 pass
 
         else: # thread.system == 'system' (peptide and surface system)
 
             # if next batch submission will be energy minimization
             if thread.type == 'em':
+
+                # isolate peptide from nvt.gro (need to check with Xin on how to do this w/o vmd)
+                # graft peptide onto slab, solvate, ionize
+                # grompp run file
                 pass
             elif thread.type == 'npt':
+
+                # grompp run file
                 pass
             else:  # thread.tyep == 'nvt'
+
+                # grompp run file
                 pass
 
         # todo: implement algorithm here or actually in algorithm class?
         # todo: consider what is stored as the final element in a history list - indicate what is currently happening with the thread
-        if next_step == 'peptide_em': # if this is the first step in this thread
-            # thread.history.tops = [thread.history.tops[-1]]
-            # run algorithm to build peptide in tleap
-            # center, grow, solavte, ionize
-            # grompp a run file (maybe do this through the gromacs MD engine?
-            pass
-            # series of commands prior to job submission
-        elif next_step == 'peptide_npt':
-            # grompp a run file for npt run
-            pass
-        elif next_step == 'peptide_nvt':
-            # grompp a run file for nvt run
-            pass
-        elif next_step == 'system_em':
-            # isolate peptide from nvt.gro (need to check with Xin on how to do this w/o vmd)
-            # graft peptide onto slab, solvate, ionize
-            # grompp runfile for em
-            pass
-        elif next_step == 'system_npt':
-            # grompp a run file for npt
-            pass
-        elif next_step == 'system_nvt':
-            # grompp a run file for nvt
-            pass
-            # series of commands prior to job submission
-    # todo: update history with what needs updating... likely different files that have been created and will need to be accessed for batch submission
-
 
         return running # todo: what will jobtype.algorithm return?
 

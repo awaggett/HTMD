@@ -195,7 +195,9 @@ def clean_peptide_ff(thread, settings):
 
     """
     # todo: remove head and tail from generated topol.top and move to .itp
-    # create new itp file for protein
+    # todo: will I need to extract the #include statements in case naming of file paths is different between force fields?
+    # create new itp file for protein:q
+
     protein_ff_in = thread.history.tops[-1]
     protein_ff_out = thread.name + '_' + thread.peptide + .itp
     ff_out = open(protein_ff_out, 'w')
@@ -251,16 +253,16 @@ def add_to_topology(thread, settings):
             else:
                 top_out.write(line)
 
-def grow_box(thread, settings):
-    # todo: testing needed - does not create a new name (but could if this was done with a gromacs command instead)
-    # read file and set new box size to dimenstions (x y z) nm
-    lines = open(gromacs_file, 'r').readlines()
-    new_box = ('   {}   {}   {}'.format(settings.peptide_box_dim, settings.peptide_box_dim, settings.peptide_box_dim))
-    lines[-1] = new_box
-    # todo: check if new box is meant to be a tuple...
-
-    # reopen and write to file
-    open(gromacs_file, 'w').writelines(lines)
+#def grow_box(thread, settings):
+#    # todo: this can be accomplished with centering
+#    # read file and set new box size to dimenstions (x y z) nm
+#    lines = open(gromacs_file, 'r').readlines()
+#    new_box = ('   {}   {}   {}'.format(settings.peptide_box_dim, settings.peptide_box_dim, settings.peptide_box_dim))
+#    lines[-1] = new_box
+#    # todo: check if new box is meant to be a tuple...
+#
+#    # reopen and write to file
+#    open(gromacs_file, 'w').writelines(lines)
 
 def get_surface_size(settings):
     surface = settings.surface_coord
@@ -269,30 +271,28 @@ def get_surface_size(settings):
     # todo: check this returns the correct thing
 
 def center_peptide(thread, settings):
-    # todo: testing needed
+    # todo: testing needed !!! -center can also handle growing box
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + thread.suffix + '.gro' # todo: decide on naming convention
-    x = settings.peptide_box_dim / 2
-    y = settings.peptide_box_dim / 2
-    z = settings.peptide_box_dim / 2
-    commandline_arg = 'gmx_mpi editconf -f {} -o {} -center {} {} {}'.format(gro_file, output_file, x, y, z)
+    output_file = thread.name + '_' thread.peptide + '_' + thread.system +'_center.gro' # todo: decide on naming convention
+    dim = settings.peptide_box_dim
+    commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} '.format(gro_file, output_file, dim)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords.append(output_file)
 
 def solvate(thread, settings):
     # todo: testing needed
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + thread.suffix + '.gro' '# todo: decide on naming convention
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system '_solvate.gro' '# todo: decide on naming convention
     topol_file = thread.history.tops[-1]
     commandline_arg = 'gmx_mpi solvate -cp {} -cs spc216.gro -o {} -p {}'.format(gro_file, output_file, topol_file)
     subprocess.run(commandline_arg, shell=True)
-    # todo: should keep same naming of topology
+    # todo: should keep same naming of topology. will just need unique naming for thread.name + thread.peptide + thread.system
     thread.history.coords.append(output_file)
 
 def grompp_ion_runfile(thread, settings):
     # todo testing needed
     gro_file = thread.history.coords[-1]
-    tpr_file = thread.name + thread.suffix # todo: check naming!
+    tpr_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.tpr' # todo: check naming!
     commandline_arg = 'gmx_mpi grompp -f ion.mdp -c {} -p topol.top -o {} -maxwarn 4'.format(gro_file, tpr_file)
     subprocess.run(commandline_arg, shell=True)
     thread.history.runfiles.append(tpr_file)
@@ -304,14 +304,14 @@ def get_system_charge(thread, settings):
 def genion(thread, settings):
     # todo testing needed
     tpr_file = thread.history.runfiles[-1]
-    output_file = thread.name + thread.suffix # todo: check!
-    user_inp = thread.name # todo: figure out how to handle input files
+    output_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.gro # todo: check!
+    input_file = get_input('genion_input.txt')
     charge = get_system_charge(thread, settings)
     if charge > 0:
         charge_mod = '-np 5'
     else:
         charge_mod = '-nn 5'
-    commandline_arg = 'gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {} < {}'.format(tpr_file, output_file, charge_mod, user_inp)
+    commandline_arg = 'gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {} < {}'.format(tpr_file, output_file, charge_mod, input_file)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords.append(output_file)
     # todo need to decide on number np or nn added based on system charge

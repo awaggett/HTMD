@@ -48,7 +48,8 @@ def process(thread, running, allthreads, settings, inp_override=''):
 
     batchfiles = []         # initialize list of batch files to submit
     jobtype = factory.jobtype_factory(settings.job_type)    # get jobtype for calling jobtype.update_history
-    this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread) # todo: needed for batch job = system.gro, topol, system.ndx
+    #this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread) # todo: needed for batch job = system.gro, topol, system.ndx
+    run_file = jobtype.get_struct(thread)
     # todo: actually, will probably just need the run file (grompp prior to submission)
     name = thread.current_name
     inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
@@ -67,17 +68,19 @@ def process(thread, running, allthreads, settings, inp_override=''):
                      #'solver': eval('settings.solver'),
                      #'inp': inp,
                      #'out': thread.name + '_' + name + '.out',
-                     'topol.top': this_top,
-                     'system.gro': this_inpcrd,
+                     #'topol.top': this_top,
+                     #'system.gro': this_inpcrd,
+
                      # todo: can just make a dummy index file for peptide or have two batch scripts based on thread.current_jobtype
-                     'system.ndx': this_index,
+                     # todo:    not necessary if just going from run file
+                     #'system.ndx': this_index,
                      #'rst': thread.name + '_' + name + '.rst7',
                      #'nc': thread.name + '_' + name + '.nc',
                      'working_directory': settings.working_directory,
                      'extra': eval('settings.extra') }
 
     filled = template.render(these_kwargs)
-    newfilename = thread.name + '_' + name + '.' + settings.batch_system
+    newfilename = thread.name + '_' + name + '.' + settings.batch_system # todo: probably need to modify this naming
     try:
         with open(newfilename, 'w') as newfile:
             newfile.write(filled)
