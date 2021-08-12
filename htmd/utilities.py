@@ -51,6 +51,10 @@ def build_peptide(thread, settings):
     # todo: Call to TLEaP. Determine where/how files will be outputted. Either return file name of .pdb file generated
     # todo: or directly add to settings.init_coord(?) w/in this function
     # write sequence in tleap format, e.g. ['ACE', 'LYS', 'NME'] --> '{ ACE LYS NME }
+
+    # or for bash script purposes: input seq = thread.peptides[thread.peptide]
+    # sequence = '{ ' + " ".join(seq) + ' }'
+
     sequence = '{ ' + " ".join(thread.peptides[thread.peptide]) + ' }'
 
     try:
@@ -170,9 +174,8 @@ def pdb2gmx(thread, settings):
     gro_file = thread.name + '_' + thread.peptide + '_init.gro' # todo: come up with better naming convention
     protein_ff = settings.force_field
     topol_file = thread.name + '_' + thread.peptide + '.top'
-    input_file = get_input('pdb2gmx_input.txt')
 
-    commandline_arg = 'gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -ter < {}'.format(pdb_file, gro_file, protein_ff, topol_file, input_file)
+    commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file)
     subprocess.run(commandline_arg, shell=True)
 
     # thread.history.coords.append(gro_file)
@@ -316,6 +319,7 @@ def genion(thread, settings):
     thread.history.coords.append(output_file)
     # todo need to decide on number np or nn added based on system charge
 
+# todo: actually, I am going to keep this in batch job
 def grompp_run(thread, settings):
     gro_file = thread.history.coords[-1]
     top_file = thread.history.tops[-1]

@@ -43,10 +43,10 @@ class Thread(object):
         self.terminated = False         # boolean indicating whether the thread has reached a termination criterion
         self.init_coords = ''
         self.peptides = []              # list of sequences (list of str) assigned to this thread for processing
-        self.current_type = ''          # str indicating job type for the present step of this thread
+        self.current_type = ''          # str indicating job type for the present step of this thread ('petide' or 'system')
         self.peptide = 0                # integer indicating index of current peptide in self.peptides
         #self.suffix = 0                 # index of current step
-        self.system = ''                # str indicating the system type of the current job step ('petide' or 'system')
+        #self.system = ''                # str indicating the system type of the current job step
 
     # Remember in implementations of Thread methods that 'self' is a thread object, even though they may make calls to
     # methods of other types of objects (that therefore use 'self' to refer to non-Thread objects)
@@ -128,7 +128,7 @@ def init_threads(settings):
         thread.name = settings.name + '_' + str(i)
         thread.peptide = 0                                  # index of current peptide in thread.peptides
         thread.current_type = ''  # todo: can maybe just start with initializing the current type as 'peptide'?
-        thread.system = 'peptide'
+        #thread.system = 'peptide'
         jobtype.update_history(thread, settings, **{'initialize': True, 'add_peptides': peptide_group}) # todo: determine if any other kwargs needed
 
         allthreads.append(thread)

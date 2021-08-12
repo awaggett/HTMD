@@ -1,18 +1,18 @@
 ; Include forcefield parameters
-#force_field
-#protein_ff
+#include "./{{ force_field }}/forcefield.itp"
+#include "{{ peptide_ff_path }}"
 
 ; Include water topology
-#include "./charmm36-nov2016-repart.ff/spce_part.itp"
+#include "./{{ force_field }}/{{ water_top }}"
 
 ; Include topology for ions
-#include "./charmm36-nov2016-repart.ff/ions.itp"
+#include "./{{ force_field }}/ions.itp"
 
 [ system ]
 ; Name
-sys_name
+{{ thread.name }} {{ thread.peptide }}
 
 [ molecules ]
 ; Compound        #mols
-protein_name
+Protein         1
 

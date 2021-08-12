@@ -217,13 +217,11 @@ class Adsorption(JobType):
     def get_next_step(self, thread, settings):
         # todo: will probably need to tweak this but a general idea
         if thread.current_type == '': # this is the first step
-            thread.current_type = 'em'
-        elif thread.current_type == 'em':
-            thread.current_type = 'npt'
-        elif thread.current_type == 'npt':
-            thread.current_type = 'nvt'
-        else: # move onto next peptide
-            thread.current_type = 'em'
+            thread.current_type = 'peptide'
+        elif thread.current_type == 'peptide':
+            thread.current_type = 'system'
+        elif thread.current_type == 'system': # move onto next peptide
+            thread.current_type = 'peptide'
         # todo: need to decide how it recognizes thread finished
         # todo: should this return something that will be equal to the thread.name in process.py?
         # todo: may be able to overlap some of this naming if essentially doing the same thing for nvt and npt peptide vs system
@@ -243,10 +241,10 @@ class Adsorption(JobType):
         # todo: check this is applicable
 
     def get_struct(self, thread):
-        if settings.batch_system == 'gromacs':
-            return thread.history.runfiles[-1]
-        else:
-            return thread.history.coords[-1], thread.history.tops[-1], thread.history.index[-1]
+        #if settings.batch_system == 'gromacs':
+        #    return thread.history.runfiles[-1] # todo: actually will be grompping w/in
+        #else:
+        return thread.history.coords[-1], thread.history.tops[-1], thread.history.index[-1]
         # todo: check this is applicable - may only need run file
 
     def update_history(self, thread, settings, **kwargs):
@@ -289,61 +287,42 @@ class Adsorption(JobType):
         # if current system is only peptide
         if thread.system == 'peptide':
 
-            # if next batch submission will be energy minimization
-            if thread.current_type == 'em':
+            # build peptide in Amber TLEaP. This will add coord to history
+            tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
 
-                # build peptide in Amber TLEaP. This will add coord to history
-                tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
+            # make pdb compatible with gromacs
+            utilities.edit_pdb(tleap_pdb)
 
-                # make pdb compatible with gromacs
-                utilities.edit_pdb(tleap_pdb)
+            # convert pdb to gro file
+            utilities.pdb2gmx(thread, settings)
 
-                # convert pdb to gro file
-                utilities.pdb2gmx(thread, settings)
+            # edit protein .itp file and populate topology base file
+            # todo: how to do this systematically
 
-                # edit protein .itp file and populate topology base file
-                # todo: how to do this systematically
+            # set box size and center peptide
+            utilities.center_peptide(thread, settings)
 
-                # set box size and center peptide
-                utilities.center_peptide(thread, settings)
+            # solvate box
+            utilities.solvate(thread, settings)
 
-                # solvate box
-                utilities.solvate(thread, settings)
+        else: # thread.current_type == 'system' (peptide and surface system)
 
-                # grompp ion runfile and add ions
-                utilities.grompp_ion_runfile(thread, settings)
-                utilities.genion(thread, settings)
+            # add nvt.gro to history.coords?
+            # center peptide
 
-                # grompp run file
-                # todo: do i want to have them all together like that...?
+            # solvate box
 
-            elif thread.current_type == 'npt':
+            # grompp ion runfile
 
-                # grompp run file
-                pass
+            # genion
 
-            else: # thread.tyep == 'nvt'
+            # translate box in z-dir
 
-                # grompp run file
-                pass
+            # convert peptide coord file from gro to pdb
 
-        else: # thread.system == 'system' (peptide and surface system)
+            # edit files prior to combining
 
-            # if next batch submission will be energy minimization
-            if thread.type == 'em':
-
-                # isolate peptide from nvt.gro (need to check with Xin on how to do this w/o vmd)
-                # graft peptide onto slab, solvate, ionize
-                # grompp run file
-                pass
-            elif thread.type == 'npt':
-
-                # grompp run file
-                pass
-            else:  # thread.tyep == 'nvt'
-
-                # grompp run file
-                pass
+            #
 
         # todo: implement algorithm here or actually in algorithm class?
         # todo: consider what is stored as the final element in a history list - indicate what is currently happening with the thread
