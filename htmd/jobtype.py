@@ -285,16 +285,16 @@ class Adsorption(JobType):
         thread.current_type = thread.get_next_step(thread, settings)
 
         # if current system is only peptide
-        if thread.system == 'peptide':
+        if thread.current_type == 'peptide':
 
             # build peptide in Amber TLEaP. This will add coord to history
             tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
 
             # make pdb compatible with gromacs
-            utilities.edit_pdb(tleap_pdb)
+            tleap_pdb_mod = utilities.edit_pdb(thread, settings)
 
             # convert pdb to gro file
-            utilities.pdb2gmx(thread, settings)
+            peptide_gro = utilities.pdb2gmx(thread, settings)
 
             # edit protein .itp file and populate topology base file
             # todo: how to do this systematically

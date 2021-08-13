@@ -64,7 +64,7 @@ def configure(input_file, user_working_directory=''):
         # Settings for Adsorption jobs
         name: str                       # identify job names
         peptide_box_dim: int = 6        # dimensions of box to relax peptide in nm (default 6x6x6)
-        force_field: str = 'charmm36-nov2016-repart'
+        force_field: str = 'charmm36-nov2016-repart.ff'
         initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
         peptides: typing.List[typing.List[str]] = []
         surface_ff: str                 # .itp force field file for surface

@@ -62,7 +62,7 @@ def build_peptide(thread, settings):
     except TypeError:
         system = tleap.System()
     short_name = thread.name + '_' thread.peptide
-    long_name = short_name + '_tleap'
+    long_name = short_name + '_tleap.pdb'
     system.pbc_type = None
     system.neutralize = False
     system.output_path = settings.working_directory # todo: check on this
@@ -70,15 +70,15 @@ def build_peptide(thread, settings):
     system.template_lines = [
         'source oldff/leaprc.ff99SBildn', # todo: update ff, not completely necessary
         short_name + ' = sequence ' + sequence, # todo: sequence = thread.peptides[i]
-        'savepdb ' + short_name + ' ' + long_name + '.pdb', # todo: decide on file naming
+        'savepdb ' + short_name + ' ' + long_name, # todo: decide on file naming
         'quit',
     ]
 
     # add output coordinate file to thread.history.coords
-    thread.history.coords.append(long_name + '.pdb')
-    return long_name + '.pdb'
+    thread.history.coords.append(long_name)
+    return long_name
 
-def edit_pdb(pdb_in):
+def edit_pdb(thread, settings):
     """
     Edits .pdb file from TLEaP to make compatible with Gromacs method pdb2gmx
     Parameters
@@ -93,7 +93,7 @@ def edit_pdb(pdb_in):
 
     """
     # Extract pdb from thread.history.coords
-    # pdb_in = thread.history.coords[-1]
+    pdb_in = thread.history.coords[-1]
     # todo: test this method further
     pdb_out = pdb_in.split('.')[0] + '_mod.pdb'
     previous_line = ''
@@ -170,18 +170,18 @@ def pdb2gmx(thread, settings):
     -------
 
     """
-    pdb_file = thread.history.coords[-1] # todo still need to decide if accessing from history or taking as input
-    gro_file = thread.name + '_' + thread.peptide + '_init.gro' # todo: come up with better naming convention
-    protein_ff = settings.force_field
+    pdb_file = thread.history.coords[-1]
+    gro_file = thread.name + '_' + thread.peptide + '_init.gro'
+    protein_ff = settings.force_field.split('.')[0]
     topol_file = thread.name + '_' + thread.peptide + '.top'
 
     commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file)
     subprocess.run(commandline_arg, shell=True)
 
-    # thread.history.coords.append(gro_file)
-    # thread.history.tops.append(topol_file) # todo: decide if this is needed
+    thread.history.coords.append(gro_file)
+    thread.history.tops.append(topol_file)
     # todo: can maybe also specify naming of topology file here to add to thread history (and posre to remove?)
-    # return gro_file
+    return gro_file
 
 def clean_peptide_ff(thread, settings):
     """
