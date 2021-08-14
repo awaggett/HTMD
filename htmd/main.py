@@ -270,5 +270,5 @@ def run_main():
     print(exit_message)
 
 if __name__ == "__main__":
-    #run_main()
+    run_main()
 

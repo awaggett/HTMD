@@ -61,7 +61,7 @@ def build_peptide(thread, settings):
         system = tleap()
     except TypeError:
         system = tleap.System()
-    short_name = thread.name + '_' thread.peptide
+    short_name = thread.name + '_' + thread.peptide
     long_name = short_name + '_tleap.pdb'
     system.pbc_type = None
     system.neutralize = False
@@ -202,7 +202,7 @@ def clean_peptide_ff(thread, settings):
     # create new itp file for protein:q
 
     protein_ff_in = thread.history.tops[-1]
-    protein_ff_out = thread.name + '_' + thread.peptide + .itp
+    protein_ff_out = thread.name + '_' + thread.peptide + '.itp'
     ff_out = open(protein_ff_out, 'w')
 
     # remove unnecesary lines from gromacs generated topology file and write to .itp
@@ -276,7 +276,7 @@ def get_surface_size(settings):
 def center_peptide(thread, settings):
     # todo: testing needed !!! -center can also handle growing box
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + '_' thread.peptide + '_' + thread.system +'_center.gro' # todo: decide on naming convention
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_center.gro' # todo: decide on naming convention
     dim = settings.peptide_box_dim
     commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} '.format(gro_file, output_file, dim)
     subprocess.run(commandline_arg, shell=True)
@@ -285,7 +285,7 @@ def center_peptide(thread, settings):
 def solvate(thread, settings):
     # todo: testing needed
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + '_' + thread.peptide + '_' + thread.system '_solvate.gro' '# todo: decide on naming convention
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_solvate.gro' # todo: decide on naming convention
     topol_file = thread.history.tops[-1]
     commandline_arg = 'gmx_mpi solvate -cp {} -cs spc216.gro -o {} -p {}'.format(gro_file, output_file, topol_file)
     subprocess.run(commandline_arg, shell=True)
@@ -307,7 +307,7 @@ def get_system_charge(thread, settings):
 def genion(thread, settings):
     # todo testing needed
     tpr_file = thread.history.runfiles[-1]
-    output_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.gro # todo: check!
+    output_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.gro' # todo: check!
     input_file = get_input('genion_input.txt')
     charge = get_system_charge(thread, settings)
     if charge > 0:
@@ -389,6 +389,6 @@ def combine_index(thread, settings):
     pass
 
 def combine_pdb(thread):
-
+    pass
 
 

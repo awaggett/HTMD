@@ -321,7 +321,7 @@ class Adsorption(JobType):
             # convert peptide coord file from gro to pdb
 
             # edit files prior to combining
-
+            pass
             #
 
         # todo: implement algorithm here or actually in algorithm class?
