@@ -254,9 +254,10 @@ class Adsorption(JobType):
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
                 #thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
                 thread.history.tops = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.coords = [] # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.indices = [] # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.runfiles = [] # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.coords = []  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.indices = []  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.runfiles = []  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.ff = []  # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.timestamps = []  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
             #if not os.path.exists( # todo: may not need timestamps?
             #        settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?

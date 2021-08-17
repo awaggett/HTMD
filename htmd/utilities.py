@@ -174,12 +174,19 @@ def pdb2gmx(thread, settings):
     gro_file = thread.name + '_' + thread.peptide + '_init.gro'
     protein_ff = settings.force_field.split('.')[0]
     topol_file = thread.name + '_' + thread.peptide + '.top'
+    posre_file = thread.name + '_' + thread.peptide + '_posre.itp'
 
-    commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file)
+    commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -i {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file, posre_file)
     subprocess.run(commandline_arg, shell=True)
 
     thread.history.coords.append(gro_file)
     thread.history.tops.append(topol_file)
+
+    # remove posre.itp - will not be used # todo: in the future may want to allow for option to keep
+    #commandline_arg2 = 'rm {}'.format(posre_file)
+    #subprocess.run(commandline_arg2, shell=True)
+    os.remove(posre_file)
+
     # todo: can maybe also specify naming of topology file here to add to thread history (and posre to remove?)
     return gro_file
 
@@ -216,12 +223,15 @@ def clean_peptide_ff(thread, settings):
                 ff_out.write(line)
             elif 'Position restraint' in line: # todo: naming is different I think - need to check this
                 end_writing = True
-            elif start_writing == True and end_writing == False:
+            elif start_writing is True and end_writing is False:
                 ff_out.write(line)
 
-    # remove gromacs generated topology file and posre file # todo: is there a way to avoid writing these?
-    # os.remove('posre.itp')
-    # os.remove(protein_ff_in)
+    # add peptide.itp to history namespace
+    thread.history.ff.append(protein_ff_out)
+
+    # remove gromacs generated topology file and posre file
+    #os.remove('posre.itp') # tood: done in pdb2gmx, but could do here instead?
+    os.remove(protein_ff_in)
 
 
 def add_to_topology(thread, settings):
@@ -255,6 +265,10 @@ def add_to_topology(thread, settings):
                 top_out.write('{}       1'.format(base_name))
             else:
                 top_out.write(line)
+
+    # get template for peptide-only system
+    template = settings.env.get_template(thread.get_batch_template(settings)) # todo: where is this defined?
+
 
 #def grow_box(thread, settings):
 #    # todo: this can be accomplished with centering
@@ -301,8 +315,12 @@ def grompp_ion_runfile(thread, settings):
     thread.history.runfiles.append(tpr_file)
 
 def get_system_charge(thread, settings):
-    # maybe there is a gromacs command for this?
-    pass
+    # read charge from peptide .itp file
+    itp_file = thread.history.ff[-1]
+
+    with open(itp_file, 'r') as itp:
+        final_charge = int([line for line in itp.readlines() if 'qtot' in line][-1].split()[-1])
+    return final_charge
 
 def genion(thread, settings):
     # todo testing needed
@@ -312,7 +330,7 @@ def genion(thread, settings):
     charge = get_system_charge(thread, settings)
     if charge > 0:
         charge_mod = '-np 5'
-    else:
+    else:  # charge <= 0
         charge_mod = '-nn 5'
     commandline_arg = 'gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {} < {}'.format(tpr_file, output_file, charge_mod, input_file)
     subprocess.run(commandline_arg, shell=True)

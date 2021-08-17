@@ -1,3 +1,7 @@
+""""
+htmd
+High Throughput Molecular Dynamics for Peptides on Surfaces
+"""
 import sys
 from setuptools import setup, find_packages
 import versioneer
