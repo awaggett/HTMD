@@ -220,7 +220,7 @@ class Adsorption(JobType):
             thread.current_type = 'peptide'
         elif thread.current_type == 'peptide':
             thread.current_type = 'system'
-        elif thread.current_type == 'system': # move onto next peptide
+        elif thread.current_type == 'system':  # move onto next peptide
             thread.current_type = 'peptide'
         # todo: need to decide how it recognizes thread finished
         # todo: should this return something that will be equal to the thread.name in process.py?
@@ -276,28 +276,28 @@ class Adsorption(JobType):
         pass
 
     def algorithm(self, thread, allthreads, running, settings):
-        this_algorithm = factory.algorithm_factory(settings.algorithm)
+        #this_algorithm = factory.algorithm_factory(settings.algorithm) # todo: not using algorithm class here...
 
-        # todo: write if statement based on jobtype.current (=petide or system) may need to have current_type == '' then next step is peptide?
-#        if thread.current_type == '':  # if this is the first step in this thread
-#            next_step = this_algorithm.get_first_step(thread, allthreads, settings) # todo: may not need a return. can just update type
-#        else:
-#            next_step = this_algorithm.get_next_step(thread, allthreads, settings)
         thread.current_type = thread.get_next_step(thread, settings)
+        # todo: implement: thread.current_peptide = thread.get_next_peptide(thread, settings)
 
-        # if current system is only peptide
+        # If current system is only peptide
         if thread.current_type == 'peptide':
 
-            # build peptide in Amber TLEaP. This will add coord to history
+            # Build peptide in Amber TLEaP. This will add coord to history
             tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
 
-            # make pdb compatible with gromacs
+            # Make pdb compatible with gromacs
             tleap_pdb_mod = utilities.edit_pdb(thread, settings)
 
-            # convert pdb to gro file
+            # Convert pdb to gro file
             peptide_gro = utilities.pdb2gmx(thread, settings)
 
-            # edit protein .itp file and populate topology base file
+            # Edit protein .itp file
+
+
+            # edit topology template file to include peptide
+
             # todo: how to do this systematically
 
             # set box size and center peptide

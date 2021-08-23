@@ -5,6 +5,7 @@ are defined separately for cleanliness and legibility.
 
 import os
 import re
+import shutil
 import sys
 import copy
 import math
@@ -29,7 +30,13 @@ try:
 except ModuleNotFoundError:
     from paprika import tleap
 
+def get_input(settings, input_file):
+    if os.path.exists(os.path.join(settings.path_to_inout_files, input_file)):
+        return os.path.join(settings.path_to_inout_files, input_file)  # todo: do I need the full path here?
 
+def get_template(settings, templ):
+    if os.path.exists(os.path.join(settings.path_to_templates, templ)):
+        return os.path.join(settings.path_to_templates, templ)  # todo: do I need the full path here?
 
 def build_peptide(thread, settings):
     """
@@ -48,14 +55,10 @@ def build_peptide(thread, settings):
     tleap init_coords or None?
 
     """
-    # todo: Call to TLEaP. Determine where/how files will be outputted. Either return file name of .pdb file generated
-    # todo: or directly add to settings.init_coord(?) w/in this function
     # write sequence in tleap format, e.g. ['ACE', 'LYS', 'NME'] --> '{ ACE LYS NME }
-
+    sequence = '{ ' + " ".join(thread.peptides[thread.peptide]) + ' }'
     # or for bash script purposes: input seq = thread.peptides[thread.peptide]
     # sequence = '{ ' + " ".join(seq) + ' }'
-
-    sequence = '{ ' + " ".join(thread.peptides[thread.peptide]) + ' }'
 
     try:
         system = tleap()
@@ -148,14 +151,6 @@ def edit_pdb(thread, settings):
         thread.history.coords.append(pdb_out)
     return pdb_out
 
-def get_input(input_file):
-    if os.path.exists(settings.path_to_inout_files + '/' + input_file):
-        return input_file # todo: do I need the full path here?
-
-def get_template(templ):
-    if os.path.exists(settings.path_to_templates + '/' + templ):
-        return templ # todo: do I need the full path here?
-
 def pdb2gmx(thread, settings):
     """
 
@@ -180,7 +175,7 @@ def pdb2gmx(thread, settings):
     subprocess.run(commandline_arg, shell=True)
 
     thread.history.coords.append(gro_file)
-    thread.history.tops.append(topol_file)
+    thread.history.peptide_ff.append(topol_file) # topology file will be edited and replaced with .itp file
 
     # remove posre.itp - will not be used # todo: in the future may want to allow for option to keep
     #commandline_arg2 = 'rm {}'.format(posre_file)
@@ -227,11 +222,11 @@ def clean_peptide_ff(thread, settings):
                 ff_out.write(line)
 
     # add peptide.itp to history namespace
-    thread.history.ff.append(protein_ff_out)
+    thread.history.peptide_ff.append(protein_ff_out)
 
     # remove gromacs generated topology file and posre file
     #os.remove('posre.itp') # tood: done in pdb2gmx, but could do here instead?
-    os.remove(protein_ff_in)
+    os.replace(protein_ff_in, protein_ff_out) # todo: better to just remove?
 
 
 def add_to_topology(thread, settings):
@@ -248,26 +243,36 @@ def add_to_topology(thread, settings):
 
     """
     # need template topology file here - this is necessary because only way in gromacs to later combine topologies
-    # create new topology file
-    top_out = open(topol_file, 'w')
-    topol_base = get_template('topol.top')
+    ff = settings.force_field
+    peptide_ff = thread.history.ff[-1]
+    water_ff = settings.path_to_water_ff
+    ion_ff = settings.path_to_ion_ff
+    thread_name = thread.name
+    thread_peptide = thread.peptide
+
+    lines = ["; Include forcefield parameters\n", "#include \"./" + str(ff) + "\"\n", "#include \"./" + str(peptide_ff)
+             + "\"\n", "\n", "; Include water topology\n", "#include \"./" + str(water_ff) + "\"\n", "\n",
+             "; Include topology for ions\n", "#include \"./" + str(ion_ff) + "\"\n", "\n", "[ system ]\n", "; Name\n",
+             str(thread_name) + " " + str(thread_peptide) + "\n", "\n", "[ molecules ]\n", "; Compound        #mols\n",
+             "Protein              2"]
+
+    topol_out = open(thread.name + '_' + thread.peptide + '_topol.top', "a")
+    topol_out.writelines(lines)
+    topol_out.close
 
     # add protein ff to topology file
-    with open(topol_base, 'r') as top_in:
+    #with open(topol_out, 'rw'):
+    #    for line in topol_out:
+    #        line_split = re.split(r'(\s+)', line)
+    #        if line_split[0] == '#protein_ff':
+    #            top_out.write('#include "./{}.itp"'.format(base_name))
+    #        elif line_split[0] == 'sys_name':
+    #            top_out.write('{} on Quartz slab'.format(base_name))
+    #        elif line_split[0] == 'protein_name':
+    #            top_out.write('{}       1'.format(base_name))
+    #        else:
+    #            top_out.write(line)
 
-        for line in top_in:
-            line_split = re.split(r'(\s+)', line)
-            if line_split[0] == '#protein_ff':
-                top_out.write('#include "./{}.itp"'.format(base_name))
-            elif line_split[0] == 'sys_name':
-                top_out.write('{} on Quartz slab'.format(base_name))
-            elif line_split[0] == 'protein_name':
-                top_out.write('{}       1'.format(base_name))
-            else:
-                top_out.write(line)
-
-    # get template for peptide-only system
-    template = settings.env.get_template(thread.get_batch_template(settings)) # todo: where is this defined?
 
 
 #def grow_box(thread, settings):
@@ -326,13 +331,13 @@ def genion(thread, settings):
     # todo testing needed
     tpr_file = thread.history.runfiles[-1]
     output_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.gro' # todo: check!
-    input_file = get_input('genion_input.txt')
+    #input_file = get_input('genion_input.txt')
     charge = get_system_charge(thread, settings)
     if charge > 0:
         charge_mod = '-np 5'
     else:  # charge <= 0
         charge_mod = '-nn 5'
-    commandline_arg = 'gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {} < {}'.format(tpr_file, output_file, charge_mod, input_file)
+    commandline_arg = 'echo SOL | gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {}'.format(tpr_file, output_file, charge_mod)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords.append(output_file)
     # todo need to decide on number np or nn added based on system charge

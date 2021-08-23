@@ -1,9 +1,9 @@
 ; Include forcefield parameters
-#include "./{{ force_field }}/forcefield.itp"
-#include "{{ peptide_ff_path }}"
+#include
+#include
 
 ; Include water topology
-#include "./{{ force_field }}/{{ water_top }}"
+#include
 
 ; Include topology for ions
 #include "./{{ force_field }}/ions.itp"
