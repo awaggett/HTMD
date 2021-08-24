@@ -37,7 +37,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
     """
 
     # Determine next step and, if appropriate, build corresponding list of batch files
-    thread.current_name = thread.get_next_step(settings)
+    #thread.current_name = thread.get_next_step(settings) # todo: I'm already updating jobstep at start of algorithm, so not needed here?
 
     if thread.terminated:
         if thread in running:
@@ -48,39 +48,42 @@ def process(thread, running, allthreads, settings, inp_override=''):
 
     batchfiles = []         # initialize list of batch files to submit
     jobtype = factory.jobtype_factory(settings.job_type)    # get jobtype for calling jobtype.update_history
-    #this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread) # todo: needed for batch job = system.gro, topol, system.ndx
-    run_file = jobtype.get_struct(thread)
-    # todo: actually, will probably just need the run file (grompp prior to submission)
-    name = thread.current_name
+    this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread)
+
+    name = thread.name + '_' + thread.peptide + '_' + thread.current_type
     inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
 
-    # todo: where is this get_template method defined?
     template = settings.env.get_template(thread.get_batch_template(settings))
+    # todo: other option is to make the template conditional depending on current type - both probably equivalent
 
-    # todo: replace this kwargs with something appropriate for your batch template
-    these_kwargs = { 'name': thread.name + '_' + name,
-                     'nodes': eval('settings.nodes'),
-                     'account': eval('settings.account'),
-                     'partition': eval('settings.partition'),
-                     'taskspernode': eval('settings.ppn'),
-                     'time': eval('settings.time'),
-                     'mem': eval('settings.mem'),
-                     #'solver': eval('settings.solver'),
-                     #'inp': inp,
-                     #'out': thread.name + '_' + name + '.out',
-                     #'topol.top': this_top,
-                     #'system.gro': this_inpcrd,
+    these_kwargs = {'name': name,
+                    'nodes': eval('settings.nodes'),
+                    'account': eval('settings.account'),
+                    'partition': eval('settings.partition'),
+                    'taskspernode': eval('settings.ppn'),
+                    'time': eval('settings.time'),
+                    'mem': eval('settings.mem'),
+                    'working_directory': settings.working_directory,
+                    'extra': eval('settings.extra')}
 
-                     # todo: can just make a dummy index file for peptide or have two batch scripts based on thread.current_jobtype
-                     # todo:    not necessary if just going from run file
-                     #'system.ndx': this_index,
-                     #'rst': thread.name + '_' + name + '.rst7',
-                     #'nc': thread.name + '_' + name + '.nc',
-                     'working_directory': settings.working_directory,
-                     'extra': eval('settings.extra') }
+    if thread.current_type == 'peptide':
+        these_kwargs.update({'em_mdp': settings.path_to_input_files + 'em_pep.mdp',
+                             'topol': this_top,
+                             'system': this_inpcrd,
+                             'npt_mdp': settings.path_to_input_files + 'npt_pep.mdp', # todo: jobtype.get_input(to get these?)
+                             'nvt_mdp': settings.path_to_input_files + 'nvt_pep.mdp'})
+
+    else: # thread.current_type == system
+        these_kwargs.update({'em_mdp': settings.path_to_input_files + 'em_sys.mdp',
+                             'topol': this_top,
+                             'system': this_inpcrd,
+                             'index': this_ndx,
+                             'npt_mdp': settings.path_to_input_files + 'npt_pep.mdp',
+                             'nvt_mdp': settings.path_to_input_files + 'nvt_pep.mdp',
+                             'plumed': settings.path_to_input_files + 'plumed.dat'})
 
     filled = template.render(these_kwargs)
-    newfilename = thread.name + '_' + name + '.' + settings.batch_system # todo: probably need to modify this naming
+    newfilename = thread.name + '_' + name + '.' + settings.batch_system # todo: probably need to modify this naming - end in .sh?
     try:
         with open(newfilename, 'w') as newfile:
             newfile.write(filled)
@@ -98,6 +101,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
 
     batchfiles.append(newfilename)
     jobtype.update_history(thread, settings, **these_kwargs)
+    # todo: here will update history to move to next step?
 
     ### Submit batch files to task manager ###
     taskmanager = factory.taskmanager_factory(settings.task_manager)

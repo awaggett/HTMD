@@ -62,7 +62,9 @@ def configure(input_file, user_working_directory=''):
         # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
         # Settings for Adsorption jobs
         name: str                       # identify job names
-        peptide_box_dim: int = 6        # dimensions of box to relax peptide in nm (default 6x6x6)
+        peptide_box_x: int = 6          # x dimension of box to relax peptide in nm (default 6x6x6)
+        peptide_box_y: int = 6          # y dimension of box
+        peptide_box_z: int = 6          # z dimension of box
         force_field: str = 'charmm36-nov2016-repart.ff' # todo gromacs input split on .
         path_to_ion_ff: str = 'charmm36-nov2016-repart.ff/ions.itp'
         path_to_water_ff: str = 'charmm36-nov2016-repart.ff/spce_part.itp'

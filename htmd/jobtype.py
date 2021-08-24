@@ -241,11 +241,7 @@ class Adsorption(JobType):
         # todo: check this is applicable
 
     def get_struct(self, thread):
-        #if settings.batch_system == 'gromacs':
-        #    return thread.history.runfiles[-1] # todo: actually will be grompping w/in
-        #else:
         return thread.history.coords[-1], thread.history.tops[-1], thread.history.index[-1]
-        # todo: check this is applicable - may only need run file
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
@@ -294,17 +290,26 @@ class Adsorption(JobType):
             peptide_gro = utilities.pdb2gmx(thread, settings)
 
             # Edit protein .itp file
+            peptide_ff = utilities.clean_peptide_ff(thread, settings)
 
+            # Edit topology template file to include peptide
+            peptide_topol = utilities.write_topology(thread, settings)
 
-            # edit topology template file to include peptide
+            # Set box size and center peptide
+            peptide_center = utilities.center_peptide(thread, settings)
 
-            # todo: how to do this systematically
+            # Solvate box
+            peptide_solv = utilities.solvate(thread, settings)
 
-            # set box size and center peptide
-            utilities.center_peptide(thread, settings)
+            # Generate ion run file and ionize
+            utilities.grompp_ion_runfile(thread, settings)
+            peptide_ions = utilities.genion(thread, settings)
 
-            # solvate box
-            utilities.solvate(thread, settings)
+            # Add empty string to thread.history.index for peptide template
+            thread.history.index.append('')
+
+            # Ready to submit batch job!
+            # todo: do I need to return anything?
 
         else: # thread.current_type == 'system' (peptide and surface system)
 

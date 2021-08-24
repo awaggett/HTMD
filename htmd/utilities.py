@@ -31,11 +31,11 @@ except ModuleNotFoundError:
     from paprika import tleap
 
 def get_input(settings, input_file):
-    if os.path.exists(os.path.join(settings.path_to_inout_files, input_file)):
-        return os.path.join(settings.path_to_inout_files, input_file)  # todo: do I need the full path here?
+    if os.path.exists(settings.path_to_inout_files + '/' + input_file):
+        return os.path.join(settings.path_to_inout_files, input_file)  # todo: do I need the full path here? or return input_file?
 
 def get_template(settings, templ):
-    if os.path.exists(os.path.join(settings.path_to_templates, templ)):
+    if os.path.exists(settings.path_to_templates + '/' + templ):
         return os.path.join(settings.path_to_templates, templ)  # todo: do I need the full path here?
 
 def build_peptide(thread, settings):
@@ -114,15 +114,15 @@ def edit_pdb(thread, settings):
                 continue
 
             atom = line_split[4]
-            AA = line_split[6]
+            aa = line_split[6]
             res = line_split[8]
 
             # change histidine naming
-            if AA == 'HIE' or AA == 'HIP' or AA == 'HID': # todo: determine how best to deal w/ protonation
+            if aa == 'HIE' or aa == 'HIP' or aa == 'HID': # todo: determine how best to deal w/ protonation
                 line_split[6] = 'HIS'
 
             # special case for  SER, CYS
-            if (AA == 'CYS' or AA == 'SER') and atom == 'HG':
+            if (aa == 'CYS' or aa == 'SER') and atom == 'HG':
                 atom = 'HG1'
                 # reformat white space
                 line_split[5] = ' ' * (len(line_split[5]) - 1)
@@ -228,8 +228,9 @@ def clean_peptide_ff(thread, settings):
     #os.remove('posre.itp') # tood: done in pdb2gmx, but could do here instead?
     os.replace(protein_ff_in, protein_ff_out) # todo: better to just remove?
 
+    return protein_ff_out
 
-def add_to_topology(thread, settings):
+def write_topology(thread, settings):
     """
     Writes to base topol.top to reference force fields to be included (user selection,
 
@@ -254,12 +255,12 @@ def add_to_topology(thread, settings):
              + "\"\n", "\n", "; Include water topology\n", "#include \"./" + str(water_ff) + "\"\n", "\n",
              "; Include topology for ions\n", "#include \"./" + str(ion_ff) + "\"\n", "\n", "[ system ]\n", "; Name\n",
              str(thread_name) + " " + str(thread_peptide) + "\n", "\n", "[ molecules ]\n", "; Compound        #mols\n",
-             "Protein              2"]
+             "Protein              1"]
 
     topol_out = open(thread.name + '_' + thread.peptide + '_topol.top', "a")
     topol_out.writelines(lines)
     topol_out.close
-
+    thread.history.tops.append(topol_out)
     # add protein ff to topology file
     #with open(topol_out, 'rw'):
     #    for line in topol_out:
@@ -273,18 +274,7 @@ def add_to_topology(thread, settings):
     #        else:
     #            top_out.write(line)
 
-
-
-#def grow_box(thread, settings):
-#    # todo: this can be accomplished with centering
-#    # read file and set new box size to dimenstions (x y z) nm
-#    lines = open(gromacs_file, 'r').readlines()
-#    new_box = ('   {}   {}   {}'.format(settings.peptide_box_dim, settings.peptide_box_dim, settings.peptide_box_dim))
-#    lines[-1] = new_box
-#    # todo: check if new box is meant to be a tuple...
-#
-#    # reopen and write to file
-#    open(gromacs_file, 'w').writelines(lines)
+    return topol_out
 
 def get_surface_size(settings):
     surface = settings.surface_coord
@@ -293,46 +283,48 @@ def get_surface_size(settings):
     # todo: check this returns the correct thing
 
 def center_peptide(thread, settings):
-    # todo: testing needed !!! -center can also handle growing box
+    # todo: testing needed !!!
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_center.gro' # todo: decide on naming convention
-    dim = settings.peptide_box_dim
-    commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} '.format(gro_file, output_file, dim)
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_center.gro' # todo: make sure these are all strings...
+    x = settings.peptide_box_x
+    y = settings.peptide_box_y
+    z = settings.peptide_box_z
+
+    commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} {} {} '.format(gro_file, output_file, x, y, z)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords.append(output_file)
+    return output_file
 
 def solvate(thread, settings):
     # todo: testing needed
     gro_file = thread.history.coords[-1]
-    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_solvate.gro' # todo: decide on naming convention
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_solvate.gro'
     topol_file = thread.history.tops[-1]
     commandline_arg = 'gmx_mpi solvate -cp {} -cs spc216.gro -o {} -p {}'.format(gro_file, output_file, topol_file)
     subprocess.run(commandline_arg, shell=True)
-    # todo: should keep same naming of topology. will just need unique naming for thread.name + thread.peptide + thread.system
-    thread.history.coords.append(output_file)
+    thread.history.coords.append(output_file) # topology file name will be unchanged
 
 def grompp_ion_runfile(thread, settings):
     # todo testing needed
     gro_file = thread.history.coords[-1]
-    tpr_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.tpr' # todo: check naming!
+    tpr_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_ion.tpr'
     commandline_arg = 'gmx_mpi grompp -f ion.mdp -c {} -p topol.top -o {} -maxwarn 4'.format(gro_file, tpr_file)
     subprocess.run(commandline_arg, shell=True)
     thread.history.runfiles.append(tpr_file)
 
-def get_system_charge(thread, settings):
+def get_system_charge(thread):
     # read charge from peptide .itp file
     itp_file = thread.history.ff[-1]
 
-    with open(itp_file, 'r') as itp:
+    with open(itp_file, 'r') as itp: # todo: make sure this is always the case
         final_charge = int([line for line in itp.readlines() if 'qtot' in line][-1].split()[-1])
     return final_charge
 
 def genion(thread, settings):
     # todo testing needed
     tpr_file = thread.history.runfiles[-1]
-    output_file = thread.name + '_' + thread.name + '_' + thread.system + '_ion.gro' # todo: check!
-    #input_file = get_input('genion_input.txt')
-    charge = get_system_charge(thread, settings)
+    output_file = thread.name + '_' + thread.peptide + '_' + thread.system + '_ion.gro' # todo: check!
+    charge = get_system_charge(thread)
     if charge > 0:
         charge_mod = '-np 5'
     else:  # charge <= 0
@@ -340,7 +332,7 @@ def genion(thread, settings):
     commandline_arg = 'echo SOL | gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {}'.format(tpr_file, output_file, charge_mod)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords.append(output_file)
-    # todo need to decide on number np or nn added based on system charge
+    return output_file
 
 # todo: actually, I am going to keep this in batch job
 def grompp_run(thread, settings):
