@@ -44,7 +44,7 @@ class Thread(object):
         self.init_coords = ''
         self.peptides = []              # list of sequences (list of str) assigned to this thread for processing
         self.current_type = ''          # str indicating job type for the present step of this thread ('petide' or 'system')
-        self.peptide = 0                # integer indicating index of current peptide in self.peptides
+        self.current_peptide = 0                # integer indicating index of current peptide in self.peptides
         #self.suffix = 0                 # index of current step
         #self.system = ''                # str indicating the system type of the current job step
 
@@ -126,9 +126,8 @@ def init_threads(settings):
         #thread.init_coords = ''     # todo: assign initial coordinates (and other desired parameters) to each thread
         thread.peptides = peptide_group
         thread.name = settings.name + '_' + str(i)
-        thread.peptide = 0                                  # index of current peptide in thread.peptides
+        thread.current_peptide = 0                                  # index of current peptide in thread.peptides
         thread.current_type = ''  # todo: can maybe just start with initializing the current type as 'peptide'?
-        #thread.system = 'peptide'
         jobtype.update_history(thread, settings, **{'initialize': True, 'add_peptides': peptide_group}) # todo: determine if any other kwargs needed
 
         allthreads.append(thread)

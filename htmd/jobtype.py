@@ -216,12 +216,14 @@ class Adsorption(JobType):
 
     def get_next_step(self, thread, settings):
         # todo: will probably need to tweak this but a general idea
-        if thread.current_type == '': # this is the first step
+        if thread.current_type == '':  # this is the first step
             thread.current_type = 'peptide'
         elif thread.current_type == 'peptide':
             thread.current_type = 'system'
-        elif thread.current_type == 'system':  # move onto next peptide
+        elif thread.current_type == 'system':  # move on to next peptide
             thread.current_type = 'peptide'
+            if thread.current_peptide < len(thread.peptides)-1:  # should not even fail this
+                thread.current_peptide += 1
         # todo: need to decide how it recognizes thread finished
         # todo: should this return something that will be equal to the thread.name in process.py?
         # todo: may be able to overlap some of this naming if essentially doing the same thing for nvt and npt peptide vs system
@@ -231,9 +233,8 @@ class Adsorption(JobType):
         return settings.path_to_input_files + '/' + settings.job_type + '_' + settings.md_engine + '.in'
         # todo: check this is applicable
 
-    def get_batch_template(self, settings):
-        # todo: may change this template definition back.../ need to add more templates for system
-        templ = settings.md_engine + '_' + settings.batch_system + '_' + thread.system + '_' + thread.current_type + '.tpl'
+    def get_batch_template(self, thread, settings):
+        templ = settings.md_engine + '_' + settings.batch_system + '_' + thread.current_type + '.tpl'
         if os.path.exists(settings.path_to_templates + '/' + templ):
             return templ
         else:
@@ -241,20 +242,23 @@ class Adsorption(JobType):
         # todo: check this is applicable
 
     def get_struct(self, thread):
-        return thread.history.coords[-1], thread.history.tops[-1], thread.history.index[-1]
+        return thread.history.coords[thread.current_peptide][-1], thread.history.tops[thread.current_peptide][-1], \
+               thread.history.index[thread.current_peptide][-1]
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
-            if kwargs['initialize']:
-                thread.history = argparse.Namespace()
+            if kwargs['initialize']: # todo: should these all actually be lists of lists for each peptide? - easier to extract data later...
+                thread.history = argparse.Namespace() # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
                 #thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
-                thread.history.tops = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.coords = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.indices = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.runfiles = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.ff = []  # list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.timestamps = []  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
+                thread.history.tops = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.coords = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.indices = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.runfiles = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.ff = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
+                thread.history.timestamps = [[] for i in range(len(peptides))]  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
+
+            # todo: do I want to also keep track of .edr, .log, .tpr files?
             #if not os.path.exists( # todo: may not need timestamps?
             #        settings.working_directory + '/algorithm_history.pkl'):  # initialize algorithm_history file if necessary # todo: deprecate?
             #    pickle.dump(thread.history, open(settings.working_directory + '/algorithm_history.pkl',
@@ -264,11 +268,17 @@ class Adsorption(JobType):
             #if 'add_peptides' in kwargs.keys():
             #    thread.history.peptides.extend(kwargs['add_peptides'])
         else:  # thread.history should already exist
-            pass
-            # todo: will probably need to put something here that removes peptides from thread.history once first process step is complete
+            # todo: do I want to add trajectories in now? (npt.xtc, nvt.xtc created at eahc job step)
+
+            # Add coordinate files from most recent batch job
+            thread.history.coords[thread.current_peptide].append(kwargs['name'] + '_npt.gro')
+            thread.history.coords[thread.current_peptide].append(kwargs['name'] + '_nvt.gro')
 
 
     def analyze(self, thread, settings):
+        # If current_type == 'peptide', no analysis needed
+
+        # If current_type == 'system', may need to do check for adsorption event
         pass
 
     def algorithm(self, thread, allthreads, running, settings):
@@ -306,14 +316,16 @@ class Adsorption(JobType):
             peptide_ions = utilities.genion(thread, settings)
 
             # Add empty string to thread.history.index for peptide template
-            thread.history.index.append('')
+            thread.history.index[thread.current_peptide].append('')
 
             # Ready to submit batch job!
             # todo: do I need to return anything?
 
-        else: # thread.current_type == 'system' (peptide and surface system)
+        else:  # thread.current_type == 'system' (peptide and surface system)
 
-            # add nvt.gro to history.coords?
+            # todo: for now, peptide starting coordinate will be nvt.gro (in future may use analyze to extract
+            #  configuration)
+
             # center peptide
 
             # solvate box
@@ -337,7 +349,6 @@ class Adsorption(JobType):
 
     def gatekeeper(self, thread, allthreads, settings):
         # todo: consider adding a function w/in gatekeeper that can identify an adsorption event and bring about early termination
-        # todo: may not be necessary if it is decided that nvt will only be running for a short amount of time anyway
 
         # If job for this thread has status 'C'ompleted/'C'anceled...
         if thread.get_status(0, settings) == 'C':  # index 0 because there is only ever one element in thread.jobids

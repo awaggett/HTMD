@@ -50,11 +50,23 @@ def process(thread, running, allthreads, settings, inp_override=''):
     jobtype = factory.jobtype_factory(settings.job_type)    # get jobtype for calling jobtype.update_history
     this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread)
 
-    name = thread.name + '_' + thread.peptide + '_' + thread.current_type
+    name = thread.name + '_' + thread.current_peptide + '_' + thread.current_type
     inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
 
-    template = settings.env.get_template(thread.get_batch_template(settings))
+    template = settings.env.get_template(thread.get_batch_template(thread, settings))
     # todo: other option is to make the template conditional depending on current type - both probably equivalent
+
+    if thread.current_type == 'peptide':
+        em_mdp = settings.path_to_input_files + 'em_pep.mdp' # todo: jobtype.get_input(to get these?)
+        npt_mdp = settings.path_to_input_files + 'npt_pep.mdp'
+        nvt_mdp = settings.path_to_input_files + 'nvt_pep.mdp'
+        plumed = None # todo: does this even need to be defined?
+
+    else:  # thread.current_type == system
+        em_mdp = settings.path_to_input_files + 'em_pep.mdp'  # todo: jobtype.get_input(to get these?)
+        npt_mdp = settings.path_to_input_files + 'npt_pep.mdp'
+        nvt_mdp = settings.path_to_input_files + 'nvt_pep.mdp'
+        plumed = settings.path_to_input_files + 'plumed.dat'
 
     these_kwargs = {'name': name,
                     'nodes': eval('settings.nodes'),
@@ -64,23 +76,14 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'time': eval('settings.time'),
                     'mem': eval('settings.mem'),
                     'working_directory': settings.working_directory,
+                    'em_mdp': em_mdp,
+                    'npt_mdp': npt_mdp,
+                    'nvt_mdp': nvt_mdp,
+                    'topol': this_top,
+                    'system': this_inpcrd,
+                    'index': this_ndx,
+                    'plumed': plumed
                     'extra': eval('settings.extra')}
-
-    if thread.current_type == 'peptide':
-        these_kwargs.update({'em_mdp': settings.path_to_input_files + 'em_pep.mdp',
-                             'topol': this_top,
-                             'system': this_inpcrd,
-                             'npt_mdp': settings.path_to_input_files + 'npt_pep.mdp', # todo: jobtype.get_input(to get these?)
-                             'nvt_mdp': settings.path_to_input_files + 'nvt_pep.mdp'})
-
-    else: # thread.current_type == system
-        these_kwargs.update({'em_mdp': settings.path_to_input_files + 'em_sys.mdp',
-                             'topol': this_top,
-                             'system': this_inpcrd,
-                             'index': this_ndx,
-                             'npt_mdp': settings.path_to_input_files + 'npt_pep.mdp',
-                             'nvt_mdp': settings.path_to_input_files + 'nvt_pep.mdp',
-                             'plumed': settings.path_to_input_files + 'plumed.dat'})
 
     filled = template.render(these_kwargs)
     newfilename = thread.name + '_' + name + '.' + settings.batch_system # todo: probably need to modify this naming - end in .sh?
@@ -99,9 +102,9 @@ def process(thread, running, allthreads, settings, inp_override=''):
         else:
             raise e
 
-    batchfiles.append(newfilename)
+    batchfiles.append(newfilename) # todo: is batch files just going to have one file?
     jobtype.update_history(thread, settings, **these_kwargs)
-    # todo: here will update history to move to next step?
+    # todo: do not want to move onto the next peptide yet because need analysis step on current peptide
 
     ### Submit batch files to task manager ###
     taskmanager = factory.taskmanager_factory(settings.task_manager)
