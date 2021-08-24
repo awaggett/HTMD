@@ -344,12 +344,19 @@ class Adsorption(JobType):
 
             # Generate ion run file and ionize
             utilities.grompp_ion_runfile(thread, settings)
-            peptide_ions = utilities.genion(thread, settings)
+            system_ions = utilities.genion(thread, settings)
 
+            # Translate box in z-direction to insert surface below
+            system_translate = utilities.translate(thread, settings)
 
-            # translate box in z-dir
+            # Convert system coordinate file from .gro to .pdb
+            system_name = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.pdb'
+            system_pdb = utilities.convert_coord(thread, settings, system_name)
+            # todo: need to see if easier in python to deal w/ pdb files or gro files (prob pdb)
+            # todo: then probably want to make a surface .pdb only once - but need for entire thread, can store in thread.history
+            surface_pdb
 
-            # convert peptide coord file from gro to pdb
+            # Combine system .pdb and surface .pdb
 
             # edit files prior to combining
             pass

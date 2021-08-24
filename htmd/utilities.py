@@ -339,7 +339,7 @@ def genion(thread, settings):
     if charge > 0:
         charge_mod = '-np 5'
     else:  # charge <= 0
-        charge_mod = '-nn 5'
+        charge_mod = '-nn 5' # todo: check if this works as expected for system
     commandline_arg = 'echo SOL | gmx_mpi genion -s {} -o {} -p topol.top -pname NA -nname CL -neutral {}'.format(tpr_file, output_file, charge_mod)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords[thread.current_peptide].append(output_file)
@@ -358,18 +358,17 @@ def extract_peptide(thread, settings):
 def translate(thread, settings):
     # todo: testing needed
     gro_file = thread.history.coords[thread.current_peptide][-1]
-    output_file = thread.name + thread.suffix # todo: check!
-    x, y, z = get_surface_size(settings) # todo: ensure both are divided by 2
+    output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.gro'
     height = settings.initial_height
-    commandline_arg = 'gmx_mpi editconf -f {} -o {} -translate {} {} {}'.format(gro_file, output_file, x, y, z)
+
+    commandline_arg = 'gmx_mpi editconf -f {} -o {} -translate 0 0 {}'.format(gro_file, output_file, height)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords[thread.current_peptide].append(output_file)
 
-def convert_coord(thread, settings):
-    # todo: testing needed
-    # converting .pdb to .gro or .gro to .pdb
+def convert_coord(thread, settings, name):
     gro_file = thread.history.coords[thread.current_peptide][-1]
-    pdb_file = thread.name # todo: check!
+    pdb_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.pdb'
+
     commandline_arg = 'gmx_mpi editconf -f {} -o {}'.format(gro_file, pdb_file)
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords[thread.current_peptide].append(pdb_file)
