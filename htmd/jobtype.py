@@ -274,6 +274,10 @@ class Adsorption(JobType):
             thread.history.coords[thread.current_peptide].append(kwargs['name'] + '_npt.gro')
             thread.history.coords[thread.current_peptide].append(kwargs['name'] + '_nvt.gro')
 
+            # Add tpr files from the most recent batch job
+            thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_npt.tpr')
+            thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_nvt.tpr')
+
 
     def analyze(self, thread, settings):
         # If current_type == 'peptide', no analysis needed
@@ -303,13 +307,13 @@ class Adsorption(JobType):
             peptide_ff = utilities.clean_peptide_ff(thread, settings)
 
             # Edit topology template file to include peptide
-            peptide_topol = utilities.write_topology(thread, settings)
+            peptide_topology = utilities.write_topology(thread, settings)
 
             # Set box size and center peptide
             peptide_center = utilities.center_peptide(thread, settings)
 
             # Solvate box
-            peptide_solv = utilities.solvate(thread, settings)
+            peptide_solvate = utilities.solvate(thread, settings)
 
             # Generate ion run file and ionize
             utilities.grompp_ion_runfile(thread, settings)
@@ -326,13 +330,22 @@ class Adsorption(JobType):
             # todo: for now, peptide starting coordinate will be nvt.gro (in future may use analyze to extract
             #  configuration)
 
-            # center peptide
+            # Extract peptide from nvt trajectory
+            peptide_relaxed = utilities.extract_peptide(thread, settings)
 
-            # solvate box
+            # Grow peptide box and center at initial height
+            system_center = utilities.center_peptide(thread, settings)
 
-            # grompp ion runfile
+            # Edit topology template file to include peptide
+            system_topology = utilities.write_topology(thread, settings)
 
-            # genion
+            # Solvate box
+            system_solvate = utilities.solvate(thread, settings)
+
+            # Generate ion run file and ionize
+            utilities.grompp_ion_runfile(thread, settings)
+            peptide_ions = utilities.genion(thread, settings)
+
 
             # translate box in z-dir
 

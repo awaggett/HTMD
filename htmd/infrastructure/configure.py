@@ -72,6 +72,7 @@ def configure(input_file, user_working_directory=''):
         peptides: typing.List[typing.List[str]] = []
         surface_ff: str                 # .itp force field file for surface
         surface_coord: str              # coordinate file for surface
+        surface_height: int             # approximate height (nm) of surface. Necessary for building peptide-surface system with sufficient space
 
         # Batch template settings energy minimization (peptide or system)
 
