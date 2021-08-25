@@ -75,7 +75,8 @@ def configure(input_file, user_working_directory=''):
         surface_height: int             # approximate height (nm) of surface. Necessary for building peptide-surface system with sufficient space
         surface_pdb: str                # .pdb file for surface # todo: may want to have option to convert from .gro
         surface_name: str               # name of surface in .itp file
-
+        surface_frozen: bool            # Boolean: True if center of slab is frozen
+        surface_center: str             # txt file containing atom number of frozen center (needed if surface_frozen == True)
         # Batch template settings energy minimization (peptide or system)
 
 

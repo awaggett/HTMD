@@ -367,6 +367,13 @@ class Adsorption(JobType):
             # Add surface ff to topology file
             combined_topology = utilities.add_to_topology(thread, settings)
 
+            # Create index file for system and if slab center frozen combine to create new system index
+            initial_index = utilities.create_index(thread, settings)
+            if settings.frozen == True:
+                system_index = utilities.combine_index(thread, settings)
+
+
+
 
 
         return running # todo: what will jobtype.algorithm return?

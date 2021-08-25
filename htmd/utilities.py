@@ -398,13 +398,25 @@ def add_to_topology(thread, settings):
 def create_index(thread, settings):
     # todo: testing needed. Input file 'q' needed
     gro_file = thread.history.coords[thread.current_peptide][-1]
-    commandline = 'gmx_mpi make_ndx -f {} -o {}'.format(gro_file, index_file)
+    index_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + "_init.ndx"
+
+    commandline = 'echo q | gmx_mpi make_ndx -f {} -o {}'.format(gro_file, index_file)
     subprocess.run(commandline, shell=True)
     thread.history.indices[thread.current_peptide].append(index_file)
+    return index_file
 
 def combine_index(thread, settings):
     # todo: more pythonic way of doing this than cat!
-    pass
+    init_index = thread.history.indices[thread.current_peptide][-1]
+    slab_center = settings.center
+    output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + "_system.ndx"
+
+    output = open(output_file, 'w')
+    output.write(open(init_index, 'r').read())
+    output.write(open(slab_center, 'r').read())
+
+    thread.history.indices[thread.current_peptide].append(output_file)
+    return output_file
 
 def combine_pdb(thread):
     pass
