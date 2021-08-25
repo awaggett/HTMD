@@ -349,21 +349,25 @@ class Adsorption(JobType):
             # Translate box in z-direction to insert surface below
             system_translate = utilities.translate(thread, settings)
 
-            # Convert system coordinate file from .gro to .pdb
-            system_name = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.pdb'
-            system_pdb = utilities.convert_coord(thread, settings, system_name)
+            # Convert peptide system coordinate file from .gro to .pdb
+            peptide_gro_file = thread.history.coords[thread.current_peptide][-1]
+            peptide_pdb_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.pdb'
+            utilities.convert_coord(peptide_gro_file, peptide_pdb_file, thread, settings)
             # todo: need to see if easier in python to deal w/ pdb files or gro files (prob pdb)
             # todo: then probably want to make a surface .pdb only once - but need for entire thread, can store in thread.history
-            surface_pdb
 
             # Combine system .pdb and surface .pdb
+            surface_pdb = thread.surface_pbd
+            combined_pdb = utilities.combine_pdb(surface_pdb, peptide_pdb_file, thread, settings)
 
-            # edit files prior to combining
-            pass
-            #
+            # Convert system coordinate file from .pdb to .gro
+            combined_gro_file = thread.name + '_' + thread.current_peptide + '_comdbined.gro'
+            utilities.convert_coord(combined_pdb, combined_gro_file, thread, settings)
 
-        # todo: implement algorithm here or actually in algorithm class?
-        # todo: consider what is stored as the final element in a history list - indicate what is currently happening with the thread
+            # Add surface ff to topology file
+            combined_topology = utilities.add_to_topology(thread, settings)
+
+
 
         return running # todo: what will jobtype.algorithm return?
 

@@ -73,6 +73,8 @@ def configure(input_file, user_working_directory=''):
         surface_ff: str                 # .itp force field file for surface
         surface_coord: str              # coordinate file for surface
         surface_height: int             # approximate height (nm) of surface. Necessary for building peptide-surface system with sufficient space
+        surface_pdb: str                # .pdb file for surface # todo: may want to have option to convert from .gro
+        surface_name: str               # name of surface in .itp file
 
         # Batch template settings energy minimization (peptide or system)
 

@@ -365,13 +365,35 @@ def translate(thread, settings):
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords[thread.current_peptide].append(output_file)
 
-def convert_coord(thread, settings, name):
-    gro_file = thread.history.coords[thread.current_peptide][-1]
-    pdb_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.pdb'
+def combine_pdb(surface, peptide, thread, settings):
+    output_file = thread.name + '_' + thread.current_peptide + '_comdbined.pdb'
 
-    commandline_arg = 'gmx_mpi editconf -f {} -o {}'.format(gro_file, pdb_file)
+    fout = open(output_file, 'w')
+    fout.writelines(open(surface, 'r').readlines()[:-2])
+    fout.writelines(open(peptide, 'r').readlines()[4:])
+
+    thread.history.coords[thread.current_peptide].append(output_file)
+    return output_file
+
+def convert_coord(file_in, file_out, thread, settings):
+    commandline_arg = 'gmx_mpi editconf -f {} -o {}'.format(file_in, file_out)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(pdb_file)
+    thread.history.coords[thread.current_peptide].append(file_out)
+
+def add_to_topology(thread, settings):
+    topology_file = thread.history.tops[thread.current_peptide][-1]
+    surface_name = settings.surface_name
+    output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_topol_sys.top'
+
+    fout = open(output_file, 'w')
+    lines = open(topology_file, 'r').readlines()
+    for line in lines:
+        fout.write(line)
+        if 'Compound' in line:
+            fout.write(surface_name + '\t\t1\n')
+
+    thread.history.tops[thread.current_peptide].append(output_file)
+    return output_file
 
 def create_index(thread, settings):
     # todo: testing needed. Input file 'q' needed
