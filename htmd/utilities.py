@@ -384,12 +384,15 @@ def add_to_topology(thread, settings):
     topology_file = thread.history.tops[thread.current_peptide][-1]
     surface_name = settings.surface_name
     output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_topol_sys.top'
+    surface_topology = settings.surface_ff
 
     fout = open(output_file, 'w')
     lines = open(topology_file, 'r').readlines()
-    for line in lines:
+    for i, line in enumerate(lines):
         fout.write(line)
-        if 'Compound' in line:
+        if i == 1:
+            fout.write('#include \"./' + surface_topology + '\"\n')
+        if i == 15:
             fout.write(surface_name + '\t\t1\n')
 
     thread.history.tops[thread.current_peptide].append(output_file)
