@@ -376,11 +376,7 @@ class Adsorption(JobType):
             if settings.frozen == True:
                 system_index = utilities.combine_index(thread, settings)
 
-
-
-
-
-
+            # Ready to submit batch job!
 
         return running # todo: what will jobtype.algorithm return?
 

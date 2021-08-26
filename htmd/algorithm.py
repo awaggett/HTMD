@@ -145,4 +145,4 @@ class Adsorption(Algorithm):
     def get_first_step(self, thread, settings):
         # build peptide according to sequence. utilities.build_peptide
         # edit amber pdb for gromacs. utilities.edit_pdb
-        
+        pass

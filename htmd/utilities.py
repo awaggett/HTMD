@@ -205,10 +205,12 @@ def clean_peptide_ff(thread, settings):
 
     protein_ff_in = thread.history.tops[thread.current_peptide][-1]
     protein_ff_out = thread.name + '_' + thread.current_peptide + '.itp'
-    ff_out = open(protein_ff_out, 'w')
+    #ff_out = open(protein_ff_out, 'w') # todo: switch these, check to be sure still works as expected
+    ff_in = open(protein_ff_in, 'r')
 
     # remove unnecesary lines from gromacs generated topology file and write to .itp
-    with open(protein_ff_in, 'r') as ff_in:
+    #with open(protein_ff_in, 'r') as ff_in:
+    with open(protein_ff_out, 'W') as ff_out:
 
         start_writing = False
         end_writing = False
@@ -259,8 +261,8 @@ def write_topology(thread, settings):
 
     topol_out = open(thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_topol.top', "a")
     topol_out.writelines(lines)
-    topol_out.close
-    thread.history.tops.[thread.current_peptide].append(topol_out)
+    topol_out.close()
+    thread.history.tops[thread.current_peptide].append(topol_out)
     # add protein ff to topology file
     #with open(topol_out, 'rw'):
     #    for line in topol_out:
@@ -324,11 +326,9 @@ def grompp_ion_runfile(thread, settings):
     thread.history.runfiles[thread.current_peptide].append(tpr_file)
 
 def get_system_charge(thread):
-    # read charge from peptide .itp file
-    itp_file = thread.history.ff[thread.current_peptide][-1]
-
-    with open(itp_file, 'r') as itp: # todo: make sure this is always the case
-        final_charge = int([line for line in itp.readlines() if 'qtot' in line][-1].split()[-1])
+    # read charge from peptide .itp file # todo: changed to not use with open, make sure still works
+    itp_file = open(thread.history.ff[thread.current_peptide][-1], 'r')
+    final_charge = int([line for line in itp_file.readlines() if 'qtot' in line][-1].split()[-1])
     return final_charge
 
 def genion(thread, settings):
@@ -368,9 +368,9 @@ def translate(thread, settings):
 def combine_pdb(surface, peptide, thread, settings):
     output_file = thread.name + '_' + thread.current_peptide + '_comdbined.pdb'
 
-    fout = open(output_file, 'w')
-    fout.writelines(open(surface, 'r').readlines()[:-2])
-    fout.writelines(open(peptide, 'r').readlines()[4:])
+    with open(output_file, 'w') as fout:
+        fout.writelines(open(surface, 'r').readlines()[:-2])
+        fout.writelines(open(peptide, 'r').readlines()[4:])
 
     thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
@@ -386,14 +386,14 @@ def add_to_topology(thread, settings):
     output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_topol_sys.top'
     surface_topology = settings.surface_ff
 
-    fout = open(output_file, 'w')
     lines = open(topology_file, 'r').readlines()
-    for i, line in enumerate(lines):
-        fout.write(line)
-        if i == 1:
-            fout.write('#include \"./' + surface_topology + '\"\n')
-        if i == 15:
-            fout.write(surface_name + '\t\t1\n')
+    with open(output_file, 'w') as fout:
+        for i, line in enumerate(lines):
+            fout.write(line)
+            if i == 1:
+                fout.write('#include \"./' + surface_topology + '\"\n')
+            if i == 15:
+                fout.write(surface_name + '\t\t1\n')
 
     thread.history.tops[thread.current_peptide].append(output_file)
     return output_file
@@ -414,14 +414,11 @@ def combine_index(thread, settings):
     slab_center = settings.center
     output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + "_system.ndx"
 
-    output = open(output_file, 'w')
-    output.write(open(init_index, 'r').read())
-    output.write(open(slab_center, 'r').read())
+    with open(output_file, 'w') as fout:
+        fout.write(open(init_index, 'r').read())
+        fout.write(open(slab_center, 'r').read())
 
     thread.history.indices[thread.current_peptide].append(output_file)
     return output_file
-
-def combine_pdb(thread):
-    pass
 
 

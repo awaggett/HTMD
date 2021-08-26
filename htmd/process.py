@@ -9,7 +9,7 @@ import sys
 import pickle
 import shutil
 import warnings
-from htmd_.infrastructure import factory
+from htmd.infrastructure import factory
 
 def process(thread, running, allthreads, settings, inp_override=''):
     """
@@ -75,7 +75,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'account': eval('settings.account'),
                     'partition': eval('settings.partition'),
                     'taskspernode': eval('settings.ppn'),
-                    'cores': cores
+                    'cores': cores,
                     'time': eval('settings.time'),
                     'mem': eval('settings.mem'),
                     'working_directory': settings.working_directory,
@@ -85,7 +85,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'topol': this_top,
                     'system': this_inpcrd,
                     'index': this_ndx,
-                    'plumed': plumed
+                    'plumed': plumed,
                     'extra': eval('settings.extra')}
 
     filled = template.render(these_kwargs)
