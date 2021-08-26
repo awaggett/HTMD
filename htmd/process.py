@@ -52,27 +52,30 @@ def process(thread, running, allthreads, settings, inp_override=''):
 
     name = thread.name + '_' + thread.current_peptide + '_' + thread.current_type
     inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
+    cores = int(settings.nodes)*int(settings.ppn)
 
     template = settings.env.get_template(thread.get_batch_template(thread, settings))
     # todo: other option is to make the template conditional depending on current type - both probably equivalent
 
     if thread.current_type == 'peptide':
-        em_mdp = settings.path_to_input_files + 'em_pep.mdp' # todo: jobtype.get_input(to get these?)
-        npt_mdp = settings.path_to_input_files + 'npt_pep.mdp'
-        nvt_mdp = settings.path_to_input_files + 'nvt_pep.mdp'
+        em_mdp = inp + '/em_pep.mdp' # todo: jobtype.get_input(to get these?)
+        npt_mdp = inp + '/npt_pep.mdp'
+        nvt_mdp = inp + '/nvt_pep.mdp'
         plumed = None # todo: does this even need to be defined?
 
     else:  # thread.current_type == system
-        em_mdp = settings.path_to_input_files + 'em_pep.mdp'  # todo: jobtype.get_input(to get these?)
-        npt_mdp = settings.path_to_input_files + 'npt_pep.mdp'
-        nvt_mdp = settings.path_to_input_files + 'nvt_pep.mdp'
-        plumed = settings.path_to_input_files + 'plumed.dat'
+        em_mdp = inp + '/em_pep.mdp'  # todo: jobtype.get_input(to get these?)
+        npt_mdp = inp + '/npt_pep.mdp'
+        nvt_mdp = inp + '/nvt_pep.mdp'
+        # todo: will probably end up making plumed constraints optional?
+        plumed = inp + '/plumed.dat'
 
     these_kwargs = {'name': name,
                     'nodes': eval('settings.nodes'),
                     'account': eval('settings.account'),
                     'partition': eval('settings.partition'),
                     'taskspernode': eval('settings.ppn'),
+                    'cores': cores
                     'time': eval('settings.time'),
                     'mem': eval('settings.mem'),
                     'working_directory': settings.working_directory,
@@ -86,7 +89,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'extra': eval('settings.extra')}
 
     filled = template.render(these_kwargs)
-    newfilename = thread.name + '_' + name + '.' + settings.batch_system # todo: probably need to modify this naming - end in .sh?
+    newfilename = thread.name + '_' + name + '.' + settings.batch_system
     try:
         with open(newfilename, 'w') as newfile:
             newfile.write(filled)

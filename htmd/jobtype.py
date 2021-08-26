@@ -250,7 +250,7 @@ class Adsorption(JobType):
             if kwargs['initialize']: # todo: should these all actually be lists of lists for each peptide? - easier to extract data later...
                 thread.history = argparse.Namespace() # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
-                #thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
+                thread.history.trajs = []  # list of strings; updated by update_history() called by process.py
                 thread.history.tops = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.coords = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.indices = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm
@@ -277,6 +277,10 @@ class Adsorption(JobType):
             # Add tpr files from the most recent batch job
             thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_npt.tpr')
             thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_nvt.tpr')
+
+            # Add xtc files from the most recent batch job
+            thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_npt.xtc')
+            thread.history.runfiles[thread.current_peptide].append(kwargs['name'] + '_nvt.xtc')
 
 
     def analyze(self, thread, settings):
@@ -371,6 +375,8 @@ class Adsorption(JobType):
             initial_index = utilities.create_index(thread, settings)
             if settings.frozen == True:
                 system_index = utilities.combine_index(thread, settings)
+
+
 
 
 

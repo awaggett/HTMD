@@ -101,6 +101,14 @@ def configure(input_file, user_working_directory=''):
     if user_working_directory:
         settings.working_directory = user_working_directory
 
+    # Format directories properly (no trailing '/')
+    if settings.working_directory[-1] == '/':
+        settings.working_directory = settings.working_directory[:-1]
+    if settings.path_to_input_files[-1] == '/':
+        settings.path_to_input_files = settings.path_to_input_files[:-1]
+    if settings.path_to_templates[-1] == '/':
+        settings.path_to_templates = settings.path_to_templates[:-1]
+
     # Set Jinja2 template environment
     if os.path.exists(settings.path_to_templates):
         settings.env = Environment(loader=FileSystemLoader(settings.path_to_templates))
