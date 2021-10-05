@@ -45,8 +45,6 @@ class Thread(object):
         self.peptides = []              # list of sequences (list of str) assigned to this thread for processing
         self.current_type = ''          # str indicating job type for the present step of this thread ('petide' or 'system')
         self.current_peptide = 0                # integer indicating index of current peptide in self.peptides
-        #self.suffix = 0                 # index of current step
-        #self.system = ''                # str indicating the system type of the current job step
 
     # Remember in implementations of Thread methods that 'self' is a thread object, even though they may make calls to
     # methods of other types of objects (that therefore use 'self' to refer to non-Thread objects)
