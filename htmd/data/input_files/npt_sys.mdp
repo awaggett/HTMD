@@ -52,7 +52,11 @@ rvdw                    = 1.1           ; VDW cut-off
 DispCorr                = no
 ;
 ;
-;
+; Constraints
+constraints             = h-bonds
+constraint-algorithm    = lincs
+lincs_iter              = 1
+lincs-order              = 4
 ;
 ; Pressure
 Pcoupl                  = berendsen

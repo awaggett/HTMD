@@ -85,7 +85,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'topol': this_top,
                     'system': this_inpcrd,
                     'index': this_ndx,
-                    'plumed': plumed,
+                    'plumed': plumed, # todo: probably going to end up removing plumed
                     'extra': eval('settings.extra')}
 
     filled = template.render(these_kwargs)
@@ -105,7 +105,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
         else:
             raise e
 
-    batchfiles.append(newfilename) # todo: is batch files just going to have one file?
+    batchfiles.append(newfilename) # todo: is batch files just going to have one file? I think so...
     jobtype.update_history(thread, settings, **these_kwargs)
     # todo: do not want to move onto the next peptide yet because need analysis step on current peptide
 

@@ -209,7 +209,8 @@ def main(settings):
     allthreads = init_threads(settings)
 
     # Move runtime to working directory
-    os.chdir(settings.working_directory)
+    os.chdir(settings.working_directory) # todo: might I want different directories for peptides?
+    # todo: should there be a check to make sure the forcefield is in the working directory?
 
     running = allthreads.copy()     # to be pruned later by thread.process()
     termination_criterion = False   # initialize global termination criterion boolean

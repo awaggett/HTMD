@@ -69,9 +69,9 @@ ref_t                    = 298
 ;
 ;
 ; Initial Velocities
-gen_vel                 = no
-;gen_temp               = 298.0
-;gen_seed               = -1
+gen_vel                 = yes
+gen_temp                = 298.0
+gen_seed                = -1
 ;
 ; Freeze Groups
 freezegrps              = freeze
