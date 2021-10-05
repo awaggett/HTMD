@@ -225,7 +225,7 @@ class Adsorption(JobType):
                 thread.current_type = 'peptide'
                 thread.current_peptide += 1 # todo: what will it do when it gets to the end of the list - need it to stop running jobs for this thread
             else: # done processing peptides. send termination crierion
-                thread.current_type == 'terminate'
+                thread.current_type = 'terminate'
 
         # todo: need to decide how it recognizes thread finished
         # todo: should this return something that will be equal to the thread.name in process.py?
