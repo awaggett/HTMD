@@ -16,8 +16,8 @@ import shutil
 import sys
 import time
 import numpy as np
-from htmd import interpret, process, jobtype
-from htmd.infrastructure import configure, factory
+import interpret, process, jobtype
+from infrastructure import configure, factory
 
 class Thread(object):
     """
@@ -261,8 +261,10 @@ def run_main():
     # Obtain settings namespace, initialize threads, and move promptly into main.
     try:
         working_directory = sys.argv[2]
+        print('working dir is: ' + str(sys.argv[2]))
     except IndexError:
         working_directory = ''
+    print('config file is: ' + str(sys.argv[1]))
     settings = configure.configure(sys.argv[1], working_directory)
     exit_message = main(settings)
     print(exit_message)

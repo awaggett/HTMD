@@ -6,7 +6,7 @@ implementing the calls to JobType methods to control the values of the thread at
 import os
 import shutil
 import pickle
-from htmd.infrastructure import factory
+from infrastructure import factory
 
 def interpret(thread, allthreads, running, settings):
     """

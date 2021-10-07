@@ -16,9 +16,9 @@ import mdtraj
 import argparse
 import itertools
 import subprocess
-from htmd import utilities
+import utilities
 from math import factorial
-from filelock import Timeout, FileLock
+#from filelock import Timeout, FileLock
 
 class Algorithm(abc.ABC):
     """

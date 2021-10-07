@@ -20,9 +20,9 @@ import warnings
 import copy
 import re
 #import psutil
-from htmd import utilities
-from htmd import main
-from htmd.infrastructure import factory
+import utilities
+import main
+from infrastructure import factory
 
 
 class JobType(abc.ABC):

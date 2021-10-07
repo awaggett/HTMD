@@ -9,7 +9,7 @@ import sys
 import pickle
 import shutil
 import warnings
-from htmd.infrastructure import factory
+from infrastructure import factory
 
 def process(thread, running, allthreads, settings, inp_override=''):
     """

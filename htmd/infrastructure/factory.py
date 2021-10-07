@@ -2,12 +2,12 @@
 Factory script for obtaining the desired interfaces from the various interface scripts.
 """
 
-from htmd import jobtype
-from htmd import algorithm
+import jobtype
+import algorithm
 #from htmd import stabilitymodel
-from htmd.infrastructure import mdengine
-from htmd.infrastructure import batchsystem
-from htmd.infrastructure import taskmanager
+from infrastructure import mdengine
+from infrastructure import batchsystem
+from infrastructure import taskmanager
 
 def mdengine_factory(mdengine_toolkit):
     """
