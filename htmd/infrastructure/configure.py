@@ -55,9 +55,12 @@ def configure(input_file, user_working_directory=''):
         extra: str = ''
 
         # File path settings
+        print(os.path.realpath(__file__))
+        print(os.path.dirname(os.path.realpath(__file__)))
         path_to_input_files: str = os.path.dirname(os.path.realpath(__file__)) + '/data/input_files'
         path_to_templates: str = os.path.dirname(os.path.realpath(
             __file__)) + '/data/templates'  # todo: note that this is used below for establishing the Jinja2 environment
+
 
         # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
         # Settings for Adsorption jobs

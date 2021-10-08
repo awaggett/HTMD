@@ -254,12 +254,12 @@ class Adsorption(JobType):
                 thread.history = argparse.Namespace() # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
                 thread.history.trajs = []  # list of strings; updated by update_history() called by process.py (.xtc files)
-                thread.history.tops = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.top filses)
-                thread.history.coords = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.gro files)
-                thread.history.indices = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.ndx files)
-                thread.history.runfiles = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.tpr files)
-                thread.history.ff = [[] for i in range(len(peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.itp files)
-                thread.history.timestamps = [[] for i in range(len(peptides))]  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
+                thread.history.tops = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.top filses)
+                thread.history.coords = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.gro files)
+                thread.history.indices = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.ndx files)
+                thread.history.runfiles = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.tpr files)
+                thread.history.ff = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.itp files)
+                thread.history.timestamps = [[] for i in range(len(thread.peptides))]  # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
 
             # todo: do I want to also keep track of .edr, .log, .tpr files?
             #if not os.path.exists( # todo: may not need timestamps?
