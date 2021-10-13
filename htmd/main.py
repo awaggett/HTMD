@@ -207,7 +207,7 @@ def main(settings):
 
     # Build or load threads
     allthreads = init_threads(settings)
-
+    
     # Move runtime to working directory
     os.chdir(settings.working_directory) # todo: might I want different directories for peptides?
     # todo: should there be a check to make sure the forcefield is in the working directory?
@@ -215,14 +215,16 @@ def main(settings):
     running = allthreads.copy()     # to be pruned later by thread.process()
     termination_criterion = False   # initialize global termination criterion boolean
     jobtype = factory.jobtype_factory(settings.job_type)    # initialize jobtype
-
+    
     # Initialize threads with first process step
     try:
         for thread in allthreads:
             # todo: change if not thread.history.traj (instead check if thread.history.peptides matches original thread.peptides?)
             #if not thread.history.trajs:    # if there have been no steps in this thread yet
-            if not thread.history.coords:   # if there have been no steps in this thread yet
-                jobtype.algorithm(thread, allthreads, settings)
+            if not any(thread.history.coords):   # if there have been no steps in this thread yet
+                print('initializing history for: ', thread.peptides)
+                jobtype.algorithm(thread, allthreads, running, settings)
+            print('Ready to process: ', thread.peptides)
             running = thread.process(running, allthreads, settings)
     except Exception as e:
         if settings.restart:
@@ -230,6 +232,7 @@ def main(settings):
                   'corrupted.')
         raise e
 
+    return None
     # Begin main loop
     # This whole thing is in a try-except block to handle cancellation of jobs when the code crashes in any way
     try:

@@ -5,7 +5,7 @@
 ;
 define = -DFLEXIBLE
 integrator              =  md-vv
-nsteps                  =  30000000
+nsteps                  =  300
 dt                      =  0.004
 ;
 ;
