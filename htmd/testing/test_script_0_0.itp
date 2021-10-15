@@ -1,0 +1,249 @@
+;
+;	File 'test_script_0_0.top' was generated
+;	By user: awaggett (1191134)
+;	On host: n2276.hyak.local
+;	At date: Fri Oct 15 12:30:54 2021
+;
+;	This is a standalone topology file
+;
+;	Created by:
+;	                :-) GROMACS - gmx pdb2gmx, 2020.5-MODIFIED (-:
+;	
+;	Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+;	Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
+;	Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing
+;	Command line:
+;	  gmx_mpi pdb2gmx -f test_script_0_0_tleap_mod.pdb -o test_script_0_0_init.gro -ff charmm36-nov2016-repart -p test_script_0_0.top -i test_script_0_0_posre.itp -water none -ter
+;	Force field was read from current directory or a relative path - path added.
+;
+
+; Include forcefield parameters
+#include "./charmm36-nov2016-repart.ff/forcefield.itp"
+
+[ moleculetype ]
+; Name            nrexcl
+Protein             3
+
+[ atoms ]
+;   nr       type  resnr residue  atom   cgnr     charge       mass  typeB    chargeB      massB
+; residue   1 ACE rtp ACE  q  0.0
+     1        CT3      1    ACE    CH3      1      -0.27      5.963
+     2        HA3      1    ACE   HH31      1       0.09      3.024
+     3        HA3      1    ACE   HH32      1       0.09      3.024
+     4        HA3      1    ACE   HH33      1       0.09      3.024
+     5          C      1    ACE      C      2       0.51     12.011
+     6          O      1    ACE      O      2      -0.51     15.999   ; qtot 0
+; residue   2 ASP rtp ASP  q -1.0
+     7        NH1      2    ASP      N      3      -0.47     11.991
+     8          H      2    ASP     HN      4       0.31      3.024
+     9        CT1      2    ASP     CA      5       0.07      9.995
+    10        HB1      2    ASP     HA      6       0.09      3.024
+    11       CT2A      2    ASP     CB      7      -0.28      7.979
+    12        HA2      2    ASP    HB1      8       0.09      3.024
+    13        HA2      2    ASP    HB2      9       0.09      3.024
+    14         CC      2    ASP     CG     10       0.62      9.995
+    15         OC      2    ASP    OD1     11      -0.76     15.999
+    16         OC      2    ASP    OD2     12      -0.76     15.999
+    17          C      2    ASP      C     13       0.51     12.011
+    18          O      2    ASP      O     14      -0.51     15.999   ; qtot -1
+; residue   3 NME rtp NME  q  0.0
+    19        NH1      3    NME      N     15      -0.47     11.991
+    20          H      3    NME     HN     15       0.31      3.024
+    21        CT3      3    NME    CH3     15      -0.11      5.963
+    22        HA3      3    NME   HH31     15       0.09      3.024
+    23        HA3      3    NME   HH32     15       0.09      3.024
+    24        HA3      3    NME   HH33     15       0.09      3.024   ; qtot -1
+
+[ bonds ]
+;  ai    aj funct            c0            c1            c2            c3
+    1     2     1 
+    1     3     1 
+    1     4     1 
+    1     5     1 
+    5     6     1 
+    5     7     1 
+    7     8     1 
+    7     9     1 
+    9    10     1 
+    9    11     1 
+    9    17     1 
+   11    12     1 
+   11    13     1 
+   11    14     1 
+   14    15     1 
+   14    16     1 
+   17    18     1 
+   17    19     1 
+   19    20     1 
+   19    21     1 
+   21    22     1 
+   21    23     1 
+   21    24     1 
+
+[ pairs ]
+;  ai    aj funct            c0            c1            c2            c3
+    1     8     1 
+    1     9     1 
+    2     6     1 
+    2     7     1 
+    3     6     1 
+    3     7     1 
+    4     6     1 
+    4     7     1 
+    5    10     1 
+    5    11     1 
+    5    17     1 
+    6     8     1 
+    6     9     1 
+    7    12     1 
+    7    13     1 
+    7    14     1 
+    7    18     1 
+    7    19     1 
+    8    10     1 
+    8    11     1 
+    8    17     1 
+    9    15     1 
+    9    16     1 
+    9    20     1 
+    9    21     1 
+   10    12     1 
+   10    13     1 
+   10    14     1 
+   10    18     1 
+   10    19     1 
+   11    18     1 
+   11    19     1 
+   12    15     1 
+   12    16     1 
+   12    17     1 
+   13    15     1 
+   13    16     1 
+   13    17     1 
+   14    17     1 
+   17    22     1 
+   17    23     1 
+   17    24     1 
+   18    20     1 
+   18    21     1 
+   20    22     1 
+   20    23     1 
+   20    24     1 
+
+[ angles ]
+;  ai    aj    ak funct            c0            c1            c2            c3
+    2     1     3     5 
+    2     1     4     5 
+    2     1     5     5 
+    3     1     4     5 
+    3     1     5     5 
+    4     1     5     5 
+    1     5     6     5 
+    1     5     7     5 
+    6     5     7     5 
+    5     7     8     5 
+    5     7     9     5 
+    8     7     9     5 
+    7     9    10     5 
+    7     9    11     5 
+    7     9    17     5 
+   10     9    11     5 
+   10     9    17     5 
+   11     9    17     5 
+    9    11    12     5 
+    9    11    13     5 
+    9    11    14     5 
+   12    11    13     5 
+   12    11    14     5 
+   13    11    14     5 
+   11    14    15     5 
+   11    14    16     5 
+   15    14    16     5 
+    9    17    18     5 
+    9    17    19     5 
+   18    17    19     5 
+   17    19    20     5 
+   17    19    21     5 
+   20    19    21     5 
+   19    21    22     5 
+   19    21    23     5 
+   19    21    24     5 
+   22    21    23     5 
+   22    21    24     5 
+   23    21    24     5 
+
+[ dihedrals ]
+;  ai    aj    ak    al funct            c0            c1            c2            c3            c4            c5
+    2     1     5     6     9 
+    2     1     5     7     9 
+    3     1     5     6     9 
+    3     1     5     7     9 
+    4     1     5     6     9 
+    4     1     5     7     9 
+    1     5     7     8     9 
+    1     5     7     9     9 
+    6     5     7     8     9 
+    6     5     7     9     9 
+    5     7     9    10     9 
+    5     7     9    11     9 
+    5     7     9    17     9 
+    8     7     9    10     9 
+    8     7     9    11     9 
+    8     7     9    17     9 
+    7     9    11    12     9 
+    7     9    11    13     9 
+    7     9    11    14     9 
+   10     9    11    12     9 
+   10     9    11    13     9 
+   10     9    11    14     9 
+   17     9    11    12     9 
+   17     9    11    13     9 
+   17     9    11    14     9 
+    7     9    17    18     9 
+    7     9    17    19     9 
+   10     9    17    18     9 
+   10     9    17    19     9 
+   11     9    17    18     9 
+   11     9    17    19     9 
+    9    11    14    15     9 
+    9    11    14    16     9 
+   12    11    14    15     9 
+   12    11    14    16     9 
+   13    11    14    15     9 
+   13    11    14    16     9 
+    9    17    19    20     9 
+    9    17    19    21     9 
+   18    17    19    20     9 
+   18    17    19    21     9 
+   17    19    21    22     9 
+   17    19    21    23     9 
+   17    19    21    24     9 
+   20    19    21    22     9 
+   20    19    21    23     9 
+   20    19    21    24     9 
+
+[ dihedrals ]
+;  ai    aj    ak    al funct            c0            c1            c2            c3
+    5     1     7     6     2 
+    7     5     9     8     2 
+   14    11    16    15     2 
+   17     9    19    18     2 
+   17    21    19    18     2 
+   19    17    21    20     2 
+
+[ cmap ]
+;  ai    aj    ak    al    am funct
+    5     7     9    17    19     1 
+
+; Include Position restraint file
+#ifdef POSRES
+#include "test_script_0_0_posre.itp"
+#endif
+
+[ system ]
+; Name
+Protein
+
+[ molecules ]
+; Compound        #mols
+Protein             1

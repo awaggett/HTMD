@@ -205,6 +205,19 @@ def main(settings):
             raise RuntimeError('Working directory ' + settings.working_directory + ' does not yet exist, but '
                                'restart = True.')
 
+    # todo: moving a bunch of files for now, but find out a way to make this not necessary     
+    # Move ff to working directory 
+    if not os.path.exists(settings.working_directory + '/' + settings.force_field):
+        source = settings.path_to_input_files + '/' + settings.force_field
+        destination = settings.working_directory + '/' + settings.force_field 
+        shutil.copytree(source, destination)
+
+    if not os.path.exists(settings.working_directory + '/ion.mdp'):
+        source = settings.path_to_input_files + '/ion.mdp'
+        destination = settings.working_directory + '/ion.mdp'
+        shutil.copyfile(source, destination)
+
+
     # Build or load threads
     allthreads = init_threads(settings)
     
