@@ -46,11 +46,13 @@ def configure(input_file, user_working_directory=''):
         task_manager: str = 'simple'    # 'simple' is the only implementation I wrote
         working_directory: str
         overwrite: bool
+        account: str 
+        partition: str
 
         # Batch template settings
         nodes: int = 1                  # number of nodes will determine partitioning of threads
         ppn: int = 1
-        mem: str = '4000mb'
+        mem: str = '20GB'
         walltime: str = '02:00:00'
         extra: str = ''
 

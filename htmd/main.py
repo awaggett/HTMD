@@ -66,7 +66,7 @@ class Thread(object):
 
     def get_batch_template(self, settings):
         jobtype = factory.jobtype_factory(settings.job_type)
-        return jobtype.get_batch_template(settings)
+        return jobtype.get_batch_template(self, settings)
 
     def get_frame(self, traj, frame, settings):
         mdengine = factory.mdengine_factory(settings.md_engine)

@@ -233,7 +233,7 @@ class Adsorption(JobType):
         return thread.current_type
 
     def get_input_file(self, thread, settings):
-        return settings.path_to_input_files + '/' + settings.job_type + '_' + settings.md_engine + '.in'
+        return settings.path_to_input_files #+ '/' + settings.job_type + '_' + settings.md_engine + '.in'
         # todo: check this is applicable
 
     def get_batch_template(self, thread, settings):
@@ -246,7 +246,7 @@ class Adsorption(JobType):
 
     def get_struct(self, thread):
         return thread.history.coords[thread.current_peptide][-1], thread.history.tops[thread.current_peptide][-1], \
-               thread.history.index[thread.current_peptide][-1]
+               thread.history.indices[thread.current_peptide][-1]
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
@@ -330,7 +330,7 @@ class Adsorption(JobType):
             print('ionized')            
 
             # Add empty string to thread.history.index for peptide template
-            thread.history.index[thread.current_peptide].append('')
+            thread.history.indices[thread.current_peptide].append('')
 
             # Ready to submit batch job!
             # todo: do I need to return anything? - will return a False termination criterion

@@ -1,0 +1,9 @@
+source oldff/leaprc.ff99SBildn
+test_script_1_0 = sequence { ACE SER NME }
+savepdb test_script_1_0 test_script_1_0_tleap.pdb
+quit
+# Skipping solvation ...
+savepdb model test_script_1_0_tleap.pdb
+saveamberparm model test_script_1_0_tleap.prmtop test_script_1_0_tleap.rst7
+desc model
+quit

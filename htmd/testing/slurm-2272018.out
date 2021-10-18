@@ -1,0 +1,190 @@
+                 :-) GROMACS - gmx grompp, 2020.5-MODIFIED (-:
+
+                            GROMACS is written by:
+     Emile Apol      Rossen Apostolov      Paul Bauer     Herman J.C. Berendsen
+    Par Bjelkmar      Christian Blau   Viacheslav Bolnykh     Kevin Boyd    
+ Aldert van Buuren   Rudi van Drunen     Anton Feenstra       Alan Gray     
+  Gerrit Groenhof     Anca Hamuraru    Vincent Hindriksen  M. Eric Irrgang  
+  Aleksei Iupinov   Christoph Junghans     Joe Jordan     Dimitrios Karkoulis
+    Peter Kasson        Jiri Kraus      Carsten Kutzner      Per Larsson    
+  Justin A. Lemkul    Viveca Lindahl    Magnus Lundborg     Erik Marklund   
+    Pascal Merz     Pieter Meulenhoff    Teemu Murtola       Szilard Pall   
+    Sander Pronk      Roland Schulz      Michael Shirts    Alexey Shvetsov  
+   Alfons Sijbers     Peter Tieleman      Jon Vincent      Teemu Virolainen 
+ Christian Wennberg    Maarten Wolf      Artem Zhmurov   
+                           and the project leaders:
+        Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
+
+Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+Copyright (c) 2001-2019, The GROMACS development team at
+Uppsala University, Stockholm University and
+the Royal Institute of Technology, Sweden.
+check out http://www.gromacs.org for more information.
+
+GROMACS is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2.1
+of the License, or (at your option) any later version.
+
+GROMACS:      gmx grompp, version 2020.5-MODIFIED
+Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
+Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing
+Command line:
+  gmx_mpi grompp -f /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/data/input_files/em_pep.mdp -c test_script_0_0_peptide_ion.gro -p test_script_0_0_peptide_topol.top -o test_script_0_0_peptide_em.tpr -maxwarn 3
+
+Ignoring obsolete mdp entry 'ns_type'
+Setting the LD random seed to -4719137
+Generated 91780 of the 91806 non-bonded parameter combinations
+Generating 1-4 interactions: fudge = 1
+Generated 61926 of the 91806 1-4 parameter combinations
+Excluding 3 bonded neighbours molecule type 'Protein'
+Excluding 2 bonded neighbours molecule type 'SOL'
+Excluding 1 bonded neighbours molecule type 'NA'
+Excluding 1 bonded neighbours molecule type 'CL'
+Analysing residue names:
+There are:     3    Protein residues
+There are:   862      Water residues
+There are:    11        Ion residues
+Analysing Protein...
+Analysing residues not classified as Protein/DNA/RNA/Water and splitting into groups...
+Number of degrees of freedom in T-Coupling group rest is 7860.00
+Calculating fourier grid dimensions for X Y Z
+Using a fourier grid of 52x52x52, spacing 0.058 0.058 0.058
+Estimate for the relative computational load of the PME mesh part: 0.33
+This run will generate roughly 252 Mb of data
+
+GROMACS reminds you: "Don't Eat That Yellow Snow" (F. Zappa)
+
+                  :-) GROMACS - gmx mdrun, 2020.5-MODIFIED (-:
+
+                            GROMACS is written by:
+     Emile Apol      Rossen Apostolov      Paul Bauer     Herman J.C. Berendsen
+    Par Bjelkmar      Christian Blau   Viacheslav Bolnykh     Kevin Boyd    
+ Aldert van Buuren   Rudi van Drunen     Anton Feenstra       Alan Gray     
+  Gerrit Groenhof     Anca Hamuraru    Vincent Hindriksen  M. Eric Irrgang  
+  Aleksei Iupinov   Christoph Junghans     Joe Jordan     Dimitrios Karkoulis
+    Peter Kasson        Jiri Kraus      Carsten Kutzner      Per Larsson    
+  Justin A. Lemkul    Viveca Lindahl    Magnus Lundborg     Erik Marklund   
+    Pascal Merz     Pieter Meulenhoff    Teemu Murtola       Szilard Pall   
+    Sander Pronk      Roland Schulz      Michael Shirts    Alexey Shvetsov  
+   Alfons Sijbers     Peter Tieleman      Jon Vincent      Teemu Virolainen 
+ Christian Wennberg    Maarten Wolf      Artem Zhmurov   
+                           and the project leaders:
+        Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
+
+Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+Copyright (c) 2001-2019, The GROMACS development team at
+Uppsala University, Stockholm University and
+the Royal Institute of Technology, Sweden.
+check out http://www.gromacs.org for more information.
+
+GROMACS is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2.1
+of the License, or (at your option) any later version.
+
+GROMACS:      gmx mdrun, version 2020.5-MODIFIED
+Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
+Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing
+Command line:
+  gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_em.tpr -c test_script_0_0_peptide_em.gro -e test_script_0_0_peptide_em.edr -g test_script_0_0_peptide_em.log
+
+Reading file test_script_0_0_peptide_em.tpr, VERSION 2020.5-MODIFIED (single precision)
+Using 3 MPI processes
+Using 1 OpenMP thread per MPI process
+
+
+WARNING: On rank 0: oversubscribing the available 1 logical CPU cores per node with 3 MPI processes.
+         This will cause considerable performance loss.
+
+NOTE: Oversubscribing the CPU, will not pin threads
+
+Steepest Descents:
+   Tolerance (Fmax)   =  2.00000e+02
+   Number of steps    =       200000
+
+writing lowest energy coordinates.
+
+Steepest Descents converged to Fmax < 200 in 1071 steps
+Potential Energy  = -5.3758043e+04
+Maximum force     =  1.8361215e+02 on atom 5
+Norm of force     =  2.1900513e+01
+
+GROMACS reminds you: "Go back to the rock from under which you came" (Fiona Apple)
+
+                 :-) GROMACS - gmx grompp, 2020.5-MODIFIED (-:
+
+                            GROMACS is written by:
+     Emile Apol      Rossen Apostolov      Paul Bauer     Herman J.C. Berendsen
+    Par Bjelkmar      Christian Blau   Viacheslav Bolnykh     Kevin Boyd    
+ Aldert van Buuren   Rudi van Drunen     Anton Feenstra       Alan Gray     
+  Gerrit Groenhof     Anca Hamuraru    Vincent Hindriksen  M. Eric Irrgang  
+  Aleksei Iupinov   Christoph Junghans     Joe Jordan     Dimitrios Karkoulis
+    Peter Kasson        Jiri Kraus      Carsten Kutzner      Per Larsson    
+  Justin A. Lemkul    Viveca Lindahl    Magnus Lundborg     Erik Marklund   
+    Pascal Merz     Pieter Meulenhoff    Teemu Murtola       Szilard Pall   
+    Sander Pronk      Roland Schulz      Michael Shirts    Alexey Shvetsov  
+   Alfons Sijbers     Peter Tieleman      Jon Vincent      Teemu Virolainen 
+ Christian Wennberg    Maarten Wolf      Artem Zhmurov   
+                           and the project leaders:
+        Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
+
+Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+Copyright (c) 2001-2019, The GROMACS development team at
+Uppsala University, Stockholm University and
+the Royal Institute of Technology, Sweden.
+check out http://www.gromacs.org for more information.
+
+GROMACS is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2.1
+of the License, or (at your option) any later version.
+
+GROMACS:      gmx grompp, version 2020.5-MODIFIED
+Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
+Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing
+Command line:
+  gmx_mpi grompp -f /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/data/input_files/npt_pep.mdp -c test_script_0_0_peptide_em.gro -p test_script_0_0_peptide_topol.top -o test_script_0_0_peptide_npt.tpr -maxwarn 3
+
+Ignoring obsolete mdp entry 'ns_type'
+Setting the LD random seed to -1079127049
+Generated 91780 of the 91806 non-bonded parameter combinations
+Generating 1-4 interactions: fudge = 1
+Generated 61926 of the 91806 1-4 parameter combinations
+Excluding 3 bonded neighbours molecule type 'Protein'
+Excluding 2 bonded neighbours molecule type 'SOL'
+Excluding 1 bonded neighbours molecule type 'NA'
+Excluding 1 bonded neighbours molecule type 'CL'
+Setting gen_seed to -570966705
+Velocities were taken from a Maxwell distribution at 298 K
+
+NOTE 1 [file test_script_0_0_peptide_topol.top, line 21]:
+  The bond in molecule-type Protein between atoms 7 N and 8 HN has an
+  estimated oscillational period of 1.6e-02 ps, which is less than 10 times
+  the time step of 2.0e-03 ps.
+  Maybe you forgot to change the constraints mdp option.
+
+Analysing residue names:
+There are:     3    Protein residues
+There are:   862      Water residues
+There are:    11        Ion residues
+Analysing Protein...
+Analysing residues not classified as Protein/DNA/RNA/Water and splitting into groups...
+Number of degrees of freedom in T-Coupling group System is 7860.00
+Determining Verlet buffer for a tolerance of 0.005 kJ/mol/ps at 298 K
+Calculated rlist for 1x1 atom pair-list as 1.300 nm, buffer size 0.000 nm
+Set rlist, assuming 4x4 atom pair-list, to 1.300 nm, buffer size 0.000 nm
+Note that mdrun will redetermine rlist based on the actual pair-list setup
+Calculating fourier grid dimensions for X Y Z
+Using a fourier grid of 40x40x40, spacing 0.075 0.075 0.075
+Estimate for the relative computational load of the PME mesh part: 0.23
+This run will generate roughly 0 Mb of data
+
+There was 1 note
+
+GROMACS reminds you: "We are continually faced by great opportunities brilliantly disguised as insoluble problems." (Lee Iacocca)
+
+slurmstepd: error: *** JOB 2272018 ON n2252 CANCELLED AT 2021-10-18T15:02:30 ***

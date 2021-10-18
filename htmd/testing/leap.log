@@ -1,4 +1,4 @@
-log started: Mon Oct 18 11:17:44 2021
+log started: Mon Oct 18 15:00:59 2021
 
 Log file: ./leap.log
 >> #
@@ -361,12 +361,12 @@ Loading: TPF
 >> HIS = HIE
 >> CHIS = CHIE
 > 
-> test_script_0_0 = sequence { ACE ASP NME  }
+> test_script_2_0 = sequence { ACE LYS NME }
 Sequence: ACE
-Sequence: ASP
+Sequence: LYS
 Sequence: NME
-> savepdb test_script_0_0 test_script_0_0_tleap.pdb
-Writing pdb file: test_script_0_0_tleap.pdb
+> savepdb test_script_2_0 test_script_2_0_tleap.pdb
+Writing pdb file: test_script_2_0_tleap.pdb
 > quit
 	Quit
 

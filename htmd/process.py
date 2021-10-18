@@ -50,11 +50,11 @@ def process(thread, running, allthreads, settings, inp_override=''):
     jobtype = factory.jobtype_factory(settings.job_type)    # get jobtype for calling jobtype.update_history
     this_inpcrd, this_top, this_ndx = jobtype.get_struct(thread)
 
-    name = thread.name + '_' + thread.current_peptide + '_' + thread.current_type
+    name = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type
     inp = jobtype.get_input_file(thread, settings) # todo: are these the input files like em.mdp/npt.mdp/nvt.mdp?
     cores = int(settings.nodes)*int(settings.ppn)
 
-    template = settings.env.get_template(thread.get_batch_template(thread, settings))
+    template = settings.env.get_template(thread.get_batch_template(settings))
     # todo: other option is to make the template conditional depending on current type - both probably equivalent
 
     if thread.current_type == 'peptide':
@@ -76,7 +76,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'partition': eval('settings.partition'),
                     'taskspernode': eval('settings.ppn'),
                     'cores': cores,
-                    'time': eval('settings.time'),
+                    'time': eval('settings.walltime'),
                     'mem': eval('settings.mem'),
                     'working_directory': settings.working_directory,
                     'em_mdp': em_mdp,
@@ -89,7 +89,7 @@ def process(thread, running, allthreads, settings, inp_override=''):
                     'extra': eval('settings.extra')}
 
     filled = template.render(these_kwargs)
-    newfilename = thread.name + '_' + name + '.' + settings.batch_system
+    newfilename = name + '.' + settings.batch_system
     try:
         with open(newfilename, 'w') as newfile:
             newfile.write(filled)
@@ -113,8 +113,8 @@ def process(thread, running, allthreads, settings, inp_override=''):
     taskmanager = factory.taskmanager_factory(settings.task_manager)
     thread.jobids = []      # to clear out previous jobids if any exist
     for file in batchfiles:
-        thread.jobids.append(taskmanager.submit_batch(file, settings))
-
+        #thread.jobids.append(taskmanager.submit_batch(file, settings))
+        pass
     if thread not in running:
         running.append(thread)
     return running
