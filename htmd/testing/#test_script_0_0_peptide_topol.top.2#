@@ -10,9 +10,10 @@
 
 [ system ]
 ; Name
-test_script_0 0
+test_script_0 0 in water
 
 [ molecules ]
 ; Compound        #mols
 
 Protein              1
+SOL               873

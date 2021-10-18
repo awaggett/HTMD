@@ -1,5 +1,5 @@
 ; Include forcefield parameters
-#include "./charmm36-nov2016-repart.ff"
+#include "./charmm36-nov2016-repart.ff/forcefield.itp"
 #include "./test_script_0_0.itp"
 
 ; Include water topology
@@ -16,4 +16,6 @@ test_script_0 0 in water
 ; Compound        #mols
 
 Protein              1
-SOL               873
+SOL         862
+NA               6
+CL               5

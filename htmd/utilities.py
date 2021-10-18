@@ -218,19 +218,20 @@ def clean_peptide_ff(thread, settings):
         for line in ff_in:
             if '[ moleculetype ]' in line:
                 start_writing = True
+                print('writing')
                 ff_out.write(line)
             elif 'Position restraint' in line: # todo: naming is different I think - need to check this
                 end_writing = True
             elif start_writing is True and end_writing is False:
                 ff_out.write(line)
-
+    
     # add peptide.itp to history namespace
     thread.history.ff[thread.current_peptide].append(protein_ff_out)
-
+    
     # remove gromacs generated topology file and posre file
-    #os.remove('posre.itp') # tood: done in pdb2gmx, but could do here instead?
-    os.replace(protein_ff_in, protein_ff_out) # todo: better to just remove?
-
+    os.remove(protein_ff_in) # tood: done in pdb2gmx, but could do here instead?
+    #os.replace(protein_ff_in, protein_ff_out) # todo: this was causing issue. better to just remove?
+    
     return protein_ff_out
 
 def write_topology(thread, settings):
@@ -247,7 +248,7 @@ def write_topology(thread, settings):
 
     """
     # need template topology file here - this is necessary because only way in gromacs to later combine topologies
-    ff = settings.force_field
+    ff = settings.force_field + '/forcefield.itp'
     peptide_ff = thread.history.ff[thread.current_peptide][-1]
     water_ff = settings.path_to_water_ff
     ion_ff = settings.path_to_ion_ff
