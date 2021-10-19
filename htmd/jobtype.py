@@ -294,40 +294,37 @@ class Adsorption(JobType):
 
     def algorithm(self, thread, allthreads, running, settings):
         #this_algorithm = factory.algorithm_factory(settings.algorithm) # todo: not using algorithm class here...
-        print(thread.peptides, ' current type is: ', thread.current_type)
+
         thread.current_type = thread.get_next_step(settings)
         # todo: implement: thread.current_peptide = thread.get_next_peptide(thread, settings)
-        print(thread.peptides, ' current type is now: ', thread.current_type)
+
         # If current system is only peptide
         if thread.current_type == 'peptide':
-            print('we are now building a peptide system')
+
             # Build peptide in Amber TLEaP. This will add coord to history
             tleap_pdb = utilities.build_peptide(thread, settings) # todo: may or may not be returning...
-            print('tleap has run')
+
             # Make pdb compatible with gromacs
             tleap_pdb_mod = utilities.edit_pdb(thread, settings)
-            print('pdb has been modified')
+
             # Convert pdb to gro file
             peptide_gro = utilities.pdb2gmx(thread, settings)
-            print('we have converted to a gro file')
+
             # Edit protein .itp file
             peptide_ff = utilities.clean_peptide_ff(thread, settings)
-            print('.itp has been edited')
+
             # Edit topology template file to include peptide
             peptide_topology = utilities.write_topology(thread, settings)
-            print('topology has been edited')
+            
             # Set box size and center peptide
             peptide_center = utilities.center_peptide(thread, settings)
-            print('box size set')
- 
+            
             # Solvate box
             peptide_solvate = utilities.solvate(thread, settings)
-            print('box solvated')
 
             # Generate ion run file and ionize
             utilities.grompp_ion_runfile(thread, settings)
             peptide_ions = utilities.genion(thread, settings)
-            print('ionized')            
 
             # Add empty string to thread.history.index for peptide template
             thread.history.indices[thread.current_peptide].append('')

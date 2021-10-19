@@ -7,7 +7,7 @@
 define                  = -DFLEXIBLE
 integrator              =  md
 tinit                   = 0.000
-nsteps                  =  2500
+nsteps                  =  250000
 dt                      =  0.002
 ;
 ;

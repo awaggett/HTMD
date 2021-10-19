@@ -31,11 +31,31 @@ Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
 Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
 Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing
 Command line:
-  gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -nsteps 10 -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi restart -cpo restart -cpt 1.0 -v
+  gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi restart -cpo restart -append -cpt 1.0 -v
 
 
 -------------------------------------------------------
 Program:     gmx mdrun, version 2020.5-MODIFIED
+Source file: src/gromacs/commandline/cmdlineparser.cpp (line 275)
+Function:    void gmx::CommandLineParser::parse(int*, char**)
+MPI rank:    2 (out of 3)
+
+Error in user input:
+Invalid command-line options
+  In command-line option -s
+    File 'test_script_0_0_peptide_nvt.tpr' does not exist or is not
+
+-------------------------------------------------------
+Program:     gmx mdrun, version 2020.5-MODIFIED
+    accessible.
+    The file could not be opened.
+      Reason: No such file or directory
+      (call to fopen() returned error code 2)
+
+For more information and tips for troubleshooting, please check the GROMACS
+website at http://www.gromacs.org/Documentation/Errors
+-------------------------------------------------------
+application called MPI_Abort(MPI_COMM_WORLD, 1) - process 2
 Source file: src/gromacs/commandline/cmdlineparser.cpp (line 275)
 Function:    void gmx::CommandLineParser::parse(int*, char**)
 MPI rank:    1 (out of 3)
@@ -53,22 +73,3 @@ For more information and tips for troubleshooting, please check the GROMACS
 website at http://www.gromacs.org/Documentation/Errors
 -------------------------------------------------------
 application called MPI_Abort(MPI_COMM_WORLD, 1) - process 1
-
--------------------------------------------------------
-Program:     gmx mdrun, version 2020.5-MODIFIED
-Source file: src/gromacs/commandline/cmdlineparser.cpp (line 275)
-Function:    void gmx::CommandLineParser::parse(int*, char**)
-MPI rank:    2 (out of 3)
-
-Error in user input:
-Invalid command-line options
-  In command-line option -s
-    File 'test_script_0_0_peptide_nvt.tpr' does not exist or is not
-    accessible.
-    The file could not be opened.
-      Reason: No such file or directory
-      (call to fopen() returned error code 2)
-
-For more information and tips for troubleshooting, please check the GROMACS
-website at http://www.gromacs.org/Documentation/Errors
--------------------------------------------------------

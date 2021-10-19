@@ -2,8 +2,9 @@
 #SBATCH --job-name="test_script_0_0_peptide"
 #SBATCH --account="pfaendtner"
 #SBATCH --partition="pfaendtner"
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+##SBATCH --nodes=1
+#SBATCH --ntasks=8
+##SBATCH --ntasks-per-node=1
 #SBATCH --time=02:00:00
 #SBATCH --mem=20GB
 
@@ -20,15 +21,15 @@ mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_em.tpr -c test_sc
 ##### NPT Equilibration #####
 gmx_mpi grompp -f /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/data/input_files/npt_pep.mdp -c test_script_0_0_peptide_em.gro  -p test_script_0_0_peptide_topol.top -o test_script_0_0_peptide_npt.tpr -maxwarn 3
 ### when running npt for the first time
-mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -nsteps 10 -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi  -cpo  -cpt 1.0 -plumed None  -v >& test_script_0_0_peptide_log.txt
+mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -nsteps 10 -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi  -cpo  -cpt 1.0 -v >& test_script_0_0_peptide_log.txt
 ### once the above is finished
-mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi  -cpo  -cpt 1.0 -append -plumed None  -v >& test_script_0_0_peptide_log.txt
+mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi  -cpo  -cpt 1.0 -append -v >& test_script_0_0_peptide_log.txt
 
 ##### NVT Equilibration #####
 gmx_mpi grompp -f /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/data/input_files/nvt_pep.mdp -c test_script_0_0_peptide_npt.gro -p test_script_0_0_peptide_topol.top -o test_script_0_0_peptide_nvt.tpr -maxwarn 3
 ### when running nvt for the first time
-mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -nsteps 10 -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi restart -cpo restart -cpt 1.0 -plumed None -v >& test_script_0_0_peptide_log.txt
+mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -nsteps 10 -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi restart -cpo restart -cpt 1.0 -v >& test_script_0_0_peptide_log.txt
 ### once the obove is finished
-mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi  restart -cpo restart -append -cpt 1.0 -plumed None -v >& name_log.txt
+mpirun -np 3 gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_nvt.tpr -c test_script_0_0_peptide_nvt.gro -e test_script_0_0_peptide_nvt.edr -x test_script_0_0_peptide_nvt.xtc -g test_script_0_0_peptide_nvt.log -cpi  restart -cpo restart -append -cpt 1.0 -v >& name_log.txt
 
 exit 0

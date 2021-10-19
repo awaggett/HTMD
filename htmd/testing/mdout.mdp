@@ -1,8 +1,8 @@
 ;
 ;	File 'mdout.mdp' was generated
 ;	By user: awaggett (1191134)
-;	On host: n2252.hyak.local
-;	At date: Mon Oct 18 15:01:57 2021
+;	On host: n2250.hyak.local
+;	At date: Tue Oct 19 15:45:22 2021
 ;
 ;	Created by:
 ;	                :-) GROMACS - gmx grompp, 2020.5-MODIFIED (-:
@@ -25,7 +25,7 @@ integrator               = md
 ; Start time and timestep in ps
 tinit                    = 0.000
 dt                       = 0.002
-nsteps                   = 2500
+nsteps                   = 250000
 ; For exact run continuation or redoing part of a run
 init-step                = 0
 ; Part index is updated automatically on checkpointing (keeps files separate)
