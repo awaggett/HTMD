@@ -397,3 +397,11 @@ class Adsorption(JobType):
         else:
             return False
 
+class Adsorption_Rep(JobType):
+    """
+    Adapter class for primary Adsorption jobtype. My current conception is that this will be the only jobtype, but I've held
+    off on simplifying the JobType class to only this implementation for now in case that changes
+    """
+
+    def get_initial_coordinates(self, settings):
+        pass
