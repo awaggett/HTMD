@@ -525,7 +525,7 @@ class Adsorption(JobType):
         elif thread.current_type == 'system': # peptide and surface system
 
             # Grow peptide box and place at randomly selected x-y coordinates within the range of the surface
-            system_center = utilities.center_peptide(thread, settings)
+            place_peptide = utilities.place_peptide(thread, settings)
             # todo: this step is done for each rep, but would actually be doing the same thing for each rep (could move this to analysis?)
 
             # Edit topology template file to include peptide

@@ -40,6 +40,9 @@ def get_template(settings, templ):
     if os.path.exists(settings.path_to_templates + '/' + templ):
         return os.path.join(settings.path_to_templates, templ)  # todo: do I need the full path here?
 
+def name_file(thread):
+    return thread.name + '_' + thread.current_type + '_' + str(thread.current_peptide) + '_' + str(thread.current_stuct) + '_' + str(thread.current_rep)
+
 def build_peptide(thread, settings):
     """
     Build peptide according to amino acid sequence in Settings.sequence using Amber's TLEaP
@@ -313,7 +316,8 @@ def center_peptide(thread, settings):
 
 def place_peptide(thread, settings):
     # todo: can maybe modify center_peptide to combine these functions
-    gro_file = thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep][0]
+    gro_file = thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+    output_file = name_file(thread) + '_center.gro'
 
     x, y, z = get_surface_size(settings)
     z_mod = settings.slab_height
@@ -326,7 +330,11 @@ def place_peptide(thread, settings):
     # Place peptide in box: box x-y dimensions equal to surface dimensions, z equal to initial height
     # Center peptide: x-y dimensions randomly selected along surface dimensions, Backbone orinetaion aligned against x-axis
     commandline_arg = 'echo Backbone | gmx_mpi editconf -f {} -o {} -box {} {} {} -center {} {} {} -princ'.format(gro_file, output_file, x, y, z_mod, x_com, y_com, z_com)
-    # echo Backbone | gmx_mpi editconf -f trans.gro -o princ3.gro -box 6 6 6 -center 0.5 2.3 3 -princ
+    subprocess.run(commandline_arg, shell=True)
+
+    thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(output_file)
+    return output_file
+
 
 def solvate(thread, settings):
     # todo: testing needed
