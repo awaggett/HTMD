@@ -443,19 +443,55 @@ class Adsorption(JobType):
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
             if kwargs['initialize']: # todo: should these all actually be lists of lists for each peptide? - easier to extract data later...
-                thread.history = argparse.Namespace() # todo: for now, just going to track current peptide w/ thread.peptide
+
+                # Peptide history attributes handle variable number of peptides
+                thread.history = argparse.Namespace()  # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.trajs = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.xtc files)
-                thread.history.tops = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  #  (.top filses)
-                thread.history.coords = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.gro files)
-                thread.history.indices = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.ndx files)
-                thread.history.runfiles = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.tpr files)
-                thread.history.ff = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.itp files)
-                thread.history.timestamps = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]
+                thread.history.trajs = []  # list of strings; updated by update_history() called by process.py (.xtc files)
+                thread.history.tops = [[] for i in range(
+                    len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.top filses)
+                thread.history.coords = [[] for i in range(
+                    len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.gro files)
+                thread.history.indices = [[] for i in range(
+                    len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.ndx files)
+                thread.history.runfiles = [[] for i in range(
+                    len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.tpr files)
+                thread.history.ff = [[] for i in range(
+                    len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.itp files)
+                thread.history.timestamps = [[] for i in
+                                             range(len(thread.peptides))]  # list of ints representing seconds since
+
+
+                # System history attributes handle variable number of peptide, structures, and replicas
+                thread.history.sys_trajs = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)]
+                                        for i in range(len(thread.peptides))]  # (.xtc files)
+                thread.history.sys_tops = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)]
+                                       for i in range(len(thread.peptides))]  # (.top files)
+                thread.history.sys_coords = [
+                    [[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in
+                    range(len(thread.peptides))]  # (.gro files)
+                thread.history.sys_indices = [
+                    [[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in
+                    range(len(thread.peptides))]  # (.ndx files)
+                thread.history.sys_runfiles = [
+                    [[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in
+                    range(len(thread.peptides))]  # (.tpr files)
+                thread.history.sys_ff = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)]
+                                     for i in range(len(thread.peptides))]  # (.itp files)
+                thread.history.sys_timestamps = [
+                    [[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in
+                    range(len(thread.peptides))]
                 # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
 
         else:  # thread.history should already exist
             # todo: need to check, but peptide should just be acting on struct,rep = 0
+
+            # todo: need to make consistant with history object naming based on previous jobtype
+
+            if thread.current_type == 'peptide':
+
+                # Add coordinate files from most recent batch job
+                # todo: need to make consistant with history object naming based on previous jobtype
 
             # Add coordinate files from most recent batch job
             thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.gro')
