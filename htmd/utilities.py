@@ -17,6 +17,8 @@ import argparse
 import subprocess
 #from paprika.build.system import TLeap as tleap
 import fileinput
+import random
+import decimal
 #import dill as pickle   # I think this is kosher!
 #from simtk.openmm.app import *
 #from simtk.openmm import *
@@ -309,6 +311,23 @@ def center_peptide(thread, settings):
     thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
 
+def place_peptide(thread, settings):
+    # todo: can maybe modify center_peptide to combine these functions
+    gro_file = thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep][0]
+
+    x, y, z = get_surface_size(settings)
+    z_mod = settings.slab_height
+
+    # Randomly select x and y coordinates within the range of the surface dimensions
+    x_com = float(decimal.Decimal(random.randrange(0, x * 100)) / 100)
+    y_com = float(decimal.Decimal(random.randrange(0, y * 100)) / 100)
+    z_com = settings.initial_height
+
+    # Place peptide in box: box x-y dimensions equal to surface dimensions, z equal to initial height
+    # Center peptide: x-y dimensions randomly selected along surface dimensions, Backbone orinetaion aligned against x-axis
+    commandline_arg = 'echo Backbone | gmx_mpi editconf -f {} -o {} -box {} {} {} -center {} {} {} -princ'.format(gro_file, output_file, x, y, z_mod, x_com, y_com, z_com)
+    # echo Backbone | gmx_mpi editconf -f trans.gro -o princ3.gro -box 6 6 6 -center 0.5 2.3 3 -princ
+
 def solvate(thread, settings):
     # todo: testing needed
     gro_file = thread.history.coords[thread.current_peptide][-1]
@@ -406,8 +425,8 @@ def create_index(thread, settings):
     gro_file = thread.history.coords[thread.current_peptide][-1]
     index_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + "_init.ndx"
 
-    commandline = 'echo q | gmx_mpi make_ndx -f {} -o {}'.format(gro_file, index_file)
-    subprocess.run(commandline, shell=True)
+    commandline_arg = 'echo q | gmx_mpi make_ndx -f {} -o {}'.format(gro_file, index_file)
+    subprocess.run(commandline_arg, shell=True)
     thread.history.indices[thread.current_peptide].append(index_file)
     return index_file
 
@@ -423,5 +442,23 @@ def combine_index(thread, settings):
 
     thread.history.indices[thread.current_peptide].append(output_file)
     return output_file
+
+def sample_trajectory(thread, settings):
+    # get random number between 0 ps and length of nvt trajectory
+    nvt_duration = settings.peptide_nvt_nsteps * settings.peptide_nvt_dt * 1000 # picoseconds
+    tpr_file = thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+    xtc_file = thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+
+    # run gromacs command to create coordinate file from randomly selected frame of nvt trajectory
+    for i in range(settings.num_structures):
+        sel = random.randint(0, nvt_duration)
+        output_file = thread.name + '_' + str(thread.current_peptide) + '_' thread.current_type + '_' + str(i) + '_init + '.gro'
+
+        commandline_arg = 'echo Protein Protein | gmx_mpi trjconv -s {} -f {} -o  -pbc whole -center -dump {}'.format(tpr_file, xtc_file, output_file, sel)
+        subprocess.run(commandline_arg, shell=True)
+
+        # add the initial coordinate file to coordinate list for each rep
+        for j in range(settings.num_reps):
+            thread.history.coords[thread.current_peptide][i][j].append(output_file)
 
 

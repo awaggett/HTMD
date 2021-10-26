@@ -126,6 +126,8 @@ def init_threads(settings):
         thread.name = settings.name + '_' + str(i)
         thread.current_peptide = 0                                  # index of current peptide in thread.peptides
         thread.current_type = ''  # todo: can maybe just start with initializing the current type as 'peptide'?
+        thread.current_struct = 0  # not used by Adsorption_Simple class
+        thread.current_rep = 0   # not used by Adsorption_Simple class
         jobtype.update_history(thread, settings, **{'initialize': True, 'add_peptides': peptide_group}) # todo: determine if any other kwargs needed
 
         allthreads.append(thread)

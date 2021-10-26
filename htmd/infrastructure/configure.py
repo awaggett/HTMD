@@ -67,13 +67,13 @@ def configure(input_file, user_working_directory=''):
         # todo: replace the below and add your own as needed. The below lines are left in place only as an example.
         # Settings for Adsorption jobs
         name: str                       # identify job names
-        peptide_box_x: int = 6          # x dimension of box to relax peptide in nm (default 6x6x6)
-        peptide_box_y: int = 6          # y dimension of box
-        peptide_box_z: int = 6          # z dimension of box
+        peptide_box_x: float = 6          # x dimension of box to relax peptide in nm (default 6x6x6)
+        peptide_box_y: float = 6          # y dimension of box
+        peptide_box_z: float = 6          # z dimension of box
         force_field: str = 'charmm36-nov2016-repart.ff' # todo gromacs input split on .
         path_to_ion_ff: str = 'charmm36-nov2016-repart.ff/ions.itp'
         path_to_water_ff: str = 'charmm36-nov2016-repart.ff/spce_part.itp'
-        initial_height: int = 2         # initial height of peptide above slab (default 2 nm)
+        initial_height: float = 2         # initial height of peptide above slab (default 2 nm)
         peptides: typing.List[typing.List[str]] = []
         surface_ff: str                 # .itp force field file for surface
         surface_coord: str              # coordinate file for surface
@@ -82,7 +82,23 @@ def configure(input_file, user_working_directory=''):
         surface_name: str               # name of surface in .itp file
         surface_frozen: bool            # Boolean: True if center of slab is frozen
         surface_center: str             # txt file containing atom number of frozen center (needed if surface_frozen == True)
-        # Batch template settings energy minimization (peptide or system)
+        num_structures: int = 4            # number of unique structures to pull from peptide nvt trajectory
+        num_reps: into = 10             # number of replicates to run for each structure (varying the initial x-y coordinates on surface)
+
+        # todo: fill in rest of these settings and add later step to populate templates accordingly
+        # Peptide EM template settings
+
+        # Peptide NPT template settings
+
+        # Peptide NVT template settings
+        peptide_nvt_nsteps: int = 30000
+        peptide_nvt_dt : float = 0.004
+
+        # System EM template settings
+
+        # System NPT template settings
+
+        # System NVT template settings
 
 
     # Import config file line-by-line using exec()
