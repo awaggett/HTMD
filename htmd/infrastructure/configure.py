@@ -82,8 +82,8 @@ def configure(input_file, user_working_directory=''):
         surface_name: str               # name of surface in .itp file
         surface_frozen: bool            # Boolean: True if center of slab is frozen
         surface_center: str             # txt file containing atom number of frozen center (needed if surface_frozen == True)
-        num_structures: int = 4            # number of unique structures to pull from peptide nvt trajectory
-        num_reps: into = 10             # number of replicates to run for each structure (varying the initial x-y coordinates on surface)
+        num_structures: int = 1            # number of unique structures to pull from peptide nvt trajectory
+        num_reps: int = 1             # number of replicates to run for each structure (varying the initial x-y coordinates on surface)
 
         # todo: fill in rest of these settings and add later step to populate templates accordingly
         # Peptide EM template settings

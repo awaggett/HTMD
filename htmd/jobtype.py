@@ -413,16 +413,36 @@ class Adsorption(JobType):
         elif thread.current_type == 'peptide':
             thread.current_type = 'system'
         elif thread.current_type == 'system':
-            # starting with thread.current_struct == 0, thread.current_rep == 0:
+            # If system is built then move on to replicates with same system
+            thread.current_type = 'replicate'
+        elif thread.current_type == 'replicate':
+            # Repeat system run for number of replicates
             if int(thread.current_rep) < settings.num_reps - 1:
                 thread.current_rep += 1
-            elif int(thread.current_struct) < settings.num_structures - 1: # just completed the last replicate for the previous structure
+            elif int(thread.current_struct) < settings.num_structures - 1: # finished the last replicate for the previous structure
                 thread.current_struct += 1
-            elif thread.current_peptide < len(thread.peptides) - 1: # finished the last structure for the previous peptide
-                thread.current_peptide += 1
+                thread.current_rep = 0
+                thread.current_type = 'system'
+            elif int(thread.current_peptide) < len(thread.peptides) - 1: # finished the last structure for the previous peptide
+                thread.current_struct = 0
+                thread.current_rep = 0
                 thread.current_type = 'peptide'
-            else:  # done processing peptides. Send termination criterion
-                thread.current_type = 'terminate' # todo: is this the correct way to say that thread is done being processed?
+            else:
+                thread.current_type = 'terminate'
+        return thread.current_type
+
+
+        #elif thread.current_type == 'system':
+            # starting with thread.current_struct == 0, thread.current_rep == 0:
+        #    if int(thread.current_rep) < settings.num_reps - 1:
+        #        thread.current_rep += 1
+        #    elif int(thread.current_struct) < settings.num_structures - 1: # just completed the last replicate for the previous structure
+        #        thread.current_struct += 1
+        #    elif thread.current_peptide < len(thread.peptides) - 1: # finished the last structure for the previous peptide
+        #        thread.current_peptide += 1
+        #        thread.current_type = 'peptide'
+        #    else:  # done processing peptides. Send termination criterion
+        #        thread.current_type = 'terminate' # todo: is this the correct way to say that thread is done being processed?
 
     def get_input_file(self, thread, settings):
         return settings.path_to_input_files #+ '/' + settings.job_type + '_' + settings.md_engine + '.in'
@@ -437,8 +457,8 @@ class Adsorption(JobType):
         # todo: check this is applicable
 
     def get_struct(self, thread):
-        return thread.history.coords[thread.current_peptide][-1], thread.history.tops[thread.current_peptide][-1], \
-               thread.history.indices[thread.current_peptide][-1]
+        return thread.history.pep_coords[thread.current_peptide], thread.history.pep_tops[thread.current_peptide], \
+               thread.history.pep_indices[thread.current_peptide]
 
     def update_history(self, thread, settings, **kwargs):
         if 'initialize' in kwargs.keys():
@@ -447,46 +467,44 @@ class Adsorption(JobType):
                 # Peptide history attributes handle variable number of peptides
                 thread.history = argparse.Namespace()  # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.history.trajs = []  # list of strings; updated by update_history() called by process.py (.xtc files)
-                thread.history.tops = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.top filses)
-                thread.history.coords = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.gro files)
-                thread.history.indices = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.ndx files)
-                thread.history.runfiles = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.tpr files)
-                thread.history.ff = [[] for i in range(len(thread.peptides))]  # list of strings; initialized by main.init_threads(), updated by algorithm (.itp files)
-    #            thread.history.timestamps = [[] for i in range(len(thread.peptides))]  # list of ints representing seconds since
+                thread.historty.pep_trajs = [] # list of strings where index corresponds to current peptide
+                thread.history.pep_tops = []
+                thread.history.pep_coords = []
+                thread.history.pep_indices = []
+                thread.history.pep_npt = []
+                thread.history.pep_nvt = []
+                thread.history.pep_ff = []
 
-
-                # System history attributes handle variable number of peptide, structures, and replicas
-                thread.history.sys_trajs = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.xtc files)
-                thread.history.sys_tops = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.top files)
-                thread.history.sys_coords = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.gro files)
-                thread.history.sys_indices = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.ndx files)
-                thread.history.sys_runfiles = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.tpr files)
-                thread.history.sys_ff = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.itp files)
-                thread.history.sys_timestamps = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]
+                # System history attributes handle variable number of peptides, structures, and replicates
+                thread.history.trajs = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.xtc files)
+                thread.history.tops = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.top files)
+                thread.history.coords = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.gro files)
+                thread.history.indices = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.ndx files)
+                thread.history.runfiles = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.tpr files)
+                thread.history.ff = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.itp files)
                 # list of ints representing seconds since the epoch for the end of each step; initialized by main.init_threads(), updated by algorithm
 
         else:  # thread.history should already exist
             # todo: need to check, but peptide should just be acting on struct,rep = 0
 
-            # todo: need to make consistant with history object naming based on previous jobtype
+            # todo: need to make consistent with history object naming based on previous jobtype
 
             if thread.current_type == 'peptide':
 
                 # Add coordinate files from most recent batch job
-                # todo: need to make consistant with history object naming based on previous jobtype
+                # todo: need to make consistent with history object naming based on previous jobtype
 
-            # Add coordinate files from most recent batch job
-            thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.gro')
-            thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.gro')
+                # Add coordinate files from most recent batch job
+                thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.gro')
+                thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.gro')
 
-            # Add tpr files from the most recent batch job
-            thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.tpr')
-            thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.tpr')
+                # Add tpr files from the most recent batch job
+                thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.tpr')
+                thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.tpr')
 
-            # Add xtc files from the most recent batch job
-            thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.xtc')
-            thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.xtc')
+                # Add xtc files from the most recent batch job
+                thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_npt.xtc')
+                thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep].append(kwargs['name'] + '_nvt.xtc')
 
 
     def analyze(self, thread, settings):
@@ -514,37 +532,40 @@ class Adsorption(JobType):
             tleap_pdb = utilities.build_peptide(thread, settings)  # todo: may or may not be returning...
 
             # Make pdb compatible with gromacs
-            tleap_pdb_mod = utilities.edit_pdb(thread, settings)
+            tleap_pdb_mod = utilities.edit_pdb(thread, settings, tleap_pdb)
 
             # Convert pdb to gro file
-            peptide_gro = utilities.pdb2gmx(thread, settings)
+            peptide_gro = utilities.pdb2gmx(thread, settings, tleap_pdb_mod)
 
             # Edit protein .itp file
-            peptide_ff = utilities.clean_peptide_ff(thread, settings)
+            peptide_ff = utilities.clean_peptide_ff(thread, settings, peptide_gro)
 
             # Edit topology template file to include peptide
-            peptide_topology = utilities.write_topology(thread, settings)
+            peptide_topology = utilities.write_topology(thread, settings, peptide_ff)
 
             # Set box size and center peptide
-            peptide_center = utilities.center_peptide(thread, settings)
+            peptide_center_gro = utilities.center_peptide(thread, settings, peptide_gro)
 
             # Solvate box
-            peptide_solvate = utilities.solvate(thread, settings)
+            peptide_solvate_gro = utilities.solvate(thread, settings, peptide_center_gro, peptide_topology)
 
             # Generate ion run file and ionize
-            utilities.grompp_ion_runfile(thread, settings)
-            peptide_ions = utilities.genion(thread, settings)
+            tpr_file = utilities.grompp_ion_runfile(thread, settings, peptide_solvate_gro, peptide_topology)
+            peptide_ion_gro = utilities.genion(thread, settings, tpr_file, peptide_topology)
 
             # Add empty string to thread.history.index for peptide template
             thread.history.indices[thread.current_peptide].append('')
 
-            # Ready to submit batch job!
+            # Ready to submit batch job! Add simulation ready files to thread.history namespace
+            # Needed - final .gro file, .top file, .ndx file
+            thread.history.coords.append(peptide_ion_gro)
+            thread.history.tops.append(peptide_topology)
             # todo: do I need to return anything? - will return a False termination criterion
 
         elif thread.current_type == 'system': # peptide and surface system
 
             # Grow peptide box and place at randomly selected x-y coordinates within the range of the surface
-            place_peptide = utilities.place_peptide(thread, settings)
+            place_peptide_gro = utilities.place_peptide(thread, settings)
             # todo: this step is done for each rep, but would actually be doing the same thing for each rep (could move this to analysis?)
 
             # Edit topology template file to include peptide
@@ -585,6 +606,10 @@ class Adsorption(JobType):
 
             # Ready to submit batch job!
 
+        elif thread.current_type == 'replicate':
+            pass
+
+        else: # thread.current_type == 'terminate'
 
 
 

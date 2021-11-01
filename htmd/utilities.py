@@ -85,10 +85,11 @@ def build_peptide(thread, settings):
     print(system.output_path)
     system.build(clean_files=False)
     # add output coordinate file to thread.history.coords
-    thread.history.coords[thread.current_peptide].append(long_name)
+    # todo: may want to introduce (uncomment line below)
+    #thread.history.coords[thread.current_peptide].append(long_name)
     return long_name
 
-def edit_pdb(thread, settings):
+def edit_pdb(thread, settings, pdb_in):
     """
     Edits .pdb file from TLEaP to make compatible with Gromacs method pdb2gmx
     Parameters
@@ -103,7 +104,7 @@ def edit_pdb(thread, settings):
 
     """
     # Extract pdb from thread.history.coords
-    pdb_in = thread.history.coords[thread.current_peptide][-1]
+    #pdb_in = thread.history.coords[thread.current_peptide][-1]
     # todo: test this method further
     pdb_out = pdb_in.split('.')[0] + '_mod.pdb'
     previous_line = ''
@@ -154,11 +155,11 @@ def edit_pdb(thread, settings):
 
             pdb_out.write(''.join(line_split))
 
-        # todo: add coord file to thread.history.coords
-        thread.history.coords[thread.current_peptide].append(pdb_out.name)
+        # todo: may want to uncomment this if does not work... to add coord file to thread.history.coords
+        #thread.history.coords[thread.current_peptide].append(pdb_out.name)
     return pdb_out
 
-def pdb2gmx(thread, settings):
+def pdb2gmx(thread, settings, pdb_file):
     """
 
     Parameters
@@ -172,7 +173,7 @@ def pdb2gmx(thread, settings):
     -------
 
     """    
-    pdb_file = thread.history.coords[thread.current_peptide][-1]
+    #pdb_file = thread.history.coords[thread.current_peptide][-1]
     gro_file = thread.name + '_' + str(thread.current_peptide) + '_init.gro'
     protein_ff = settings.force_field.split('.')[0]
     topol_file = thread.name + '_' + str(thread.current_peptide) + '.top'
@@ -180,8 +181,9 @@ def pdb2gmx(thread, settings):
     
     commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -i {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file, posre_file)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(gro_file)
-    thread.history.tops[thread.current_peptide].append(topol_file)  # topology file will be edited and replaced with .itp file
+    # todo: may want to uncomment this later...
+    #thread.history.coords[thread.current_peptide].append(gro_file)
+    #thread.history.tops[thread.current_peptide].append(topol_file)  # topology file will be edited and replaced with .itp file
 
     # remove posre.itp - will not be used # todo: in the future may want to allow for option to keep
     #commandline_arg2 = 'rm {}'.format(posre_file)
@@ -191,7 +193,7 @@ def pdb2gmx(thread, settings):
     # todo: can maybe also specify naming of topology file here to add to thread history (and posre to remove?)
     return gro_file
 
-def clean_peptide_ff(thread, settings):
+def clean_peptide_ff(thread, settings, protein_ff_in):
     """
     Moves Gromacs generated peptide topology from topol.top to {peptide}.itp. Writes new topol.top to contain
     information on the force fields to include and eventually to add
@@ -209,7 +211,7 @@ def clean_peptide_ff(thread, settings):
     # todo: will I need to extract the #include statements in case naming of file paths is different between force fields?
     # create new itp file for protein:q
 
-    protein_ff_in = thread.history.tops[thread.current_peptide][-1]
+    #protein_ff_in = thread.history.tops[thread.current_peptide][-1]
     protein_ff_out = thread.name + '_' + str(thread.current_peptide) + '.itp'
     #ff_out = open(protein_ff_out, 'w') # todo: switch these, check to be sure still works as expected
     ff_in = open(protein_ff_in, 'r')
@@ -231,6 +233,7 @@ def clean_peptide_ff(thread, settings):
                 ff_out.write(line)
     
     # add peptide.itp to history namespace
+    # todo: keeping for now because this is the final version
     thread.history.ff[thread.current_peptide].append(protein_ff_out)
     
     # remove gromacs generated topology file and posre file
@@ -239,7 +242,7 @@ def clean_peptide_ff(thread, settings):
     
     return protein_ff_out
 
-def write_topology(thread, settings):
+def write_topology(thread, settings, peptide_ff):
     """
     Writes to base topol.top to reference force fields to be included (user selection,
 
@@ -254,7 +257,7 @@ def write_topology(thread, settings):
     """
     # need template topology file here - this is necessary because only way in gromacs to later combine topologies
     ff = settings.force_field + '/forcefield.itp'
-    peptide_ff = thread.history.ff[thread.current_peptide][-1]
+    #peptide_ff = thread.history.ff[thread.current_peptide][-1]
     water_ff = settings.path_to_water_ff
     ion_ff = settings.path_to_ion_ff
     thread_name = thread.name
@@ -269,7 +272,8 @@ def write_topology(thread, settings):
     topol_out = open(thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_topol.top', "a")
     topol_out.writelines(lines)
     topol_out.close()
-    thread.history.tops[thread.current_peptide].append(topol_out.name)
+    # todo: may want to uncomment later...
+    #thread.history.tops[thread.current_peptide].append(topol_out.name)
     # add protein ff to topology file
     #with open(topol_out, 'rw'):
     #    for line in topol_out:
@@ -283,7 +287,7 @@ def write_topology(thread, settings):
     #        else:
     #            top_out.write(line)
 
-    return topol_out
+    return topol_out.name
 
 def get_surface_size(settings):
     surface = settings.surface_coord
@@ -291,9 +295,9 @@ def get_surface_size(settings):
     return dims[0], dims[1], dims[2]
     # todo: check this returns the correct thing - could also just pull from .itp file
 
-def center_peptide(thread, settings):
+def center_peptide(thread, settings, gro_file):
     # todo: testing needed !!!
-    gro_file = thread.history.coords[thread.current_peptide][-1]
+    #gro_file = thread.history.coords[thread.current_peptide][-1]
     output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_center.gro' # todo: make sure these are all strings...
 
     if thread.current_type == 'peptide':
@@ -311,7 +315,8 @@ def center_peptide(thread, settings):
 
     #gmx_mpi editconf -f {} -o {} -box {} {} {} '.format(gro_file, output_file, x, y, z)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(output_file)
+    # todo: may want to uncomment later...
+    #thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
 
 def place_peptide(thread, settings):
@@ -332,27 +337,30 @@ def place_peptide(thread, settings):
     commandline_arg = 'echo Backbone | gmx_mpi editconf -f {} -o {} -box {} {} {} -center {} {} {} -princ'.format(gro_file, output_file, x, y, z_mod, x_com, y_com, z_com)
     subprocess.run(commandline_arg, shell=True)
 
-    thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(output_file)
+    # todo: may want to uncomment later...
+    #thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep].append(output_file)
     return output_file
 
 
-def solvate(thread, settings):
-    # todo: testing needed
-    gro_file = thread.history.coords[thread.current_peptide][-1]
+def solvate(thread, settings, gro_file, topol_file):
+    #gro_file = thread.history.coords[thread.current_peptide][-1]
     output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_solvate.gro'
-    topol_file = thread.history.tops[thread.current_peptide][-1]
+    #topol_file = thread.history.tops[thread.current_peptide][-1]
     commandline_arg = 'gmx_mpi solvate -cp {} -cs spc216.gro -o {} -p {}'.format(gro_file, output_file, topol_file)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(output_file) # topology file name will be unchanged
+    # todo: may want to uncomment this later
+    #thread.history.coords[thread.current_peptide].append(output_file) # topology file name will be unchanged
+    return output_file
 
-def grompp_ion_runfile(thread, settings):
-    # todo testing needed
-    gro_file = thread.history.coords[thread.current_peptide][-1]
+def grompp_ion_runfile(thread, settings, gro_file, topol_file):
+    #gro_file = thread.history.coords[thread.current_peptide][-1]
     tpr_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_ion.tpr'
-    topol_file = thread.history.tops[thread.current_peptide][-1]
+    #topol_file = thread.history.tops[thread.current_peptide][-1]
     commandline_arg = 'gmx_mpi grompp -f ion.mdp -c {} -p {} -o {} -maxwarn 4'.format(gro_file, topol_file, tpr_file)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.runfiles[thread.current_peptide].append(tpr_file)
+    # todo: may want to uncomment later
+    #thread.history.runfiles[thread.current_peptide].append(tpr_file)
+    return tpr_file
 
 def get_system_charge(thread):
     # read charge from peptide .itp file # todo: changed to not use with open, make sure still works
@@ -360,11 +368,11 @@ def get_system_charge(thread):
     final_charge = int([line for line in itp_file.readlines() if 'qtot' in line][-1].split()[-1])
     return final_charge
 
-def genion(thread, settings):
+def genion(thread, settings, tpr_file, topol_file):
     # todo testing needed
-    tpr_file = thread.history.runfiles[thread.current_peptide][-1]
+    #tpr_file = thread.history.runfiles[thread.current_peptide][-1]
     output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_ion.gro' # todo: check!
-    topol_file = thread.history.tops[thread.current_peptide][-1]
+    #topol_file = thread.history.tops[thread.current_peptide][-1]
     charge = get_system_charge(thread)
     if charge > 0:
         charge_mod = '-np 5'
@@ -372,7 +380,8 @@ def genion(thread, settings):
         charge_mod = '-nn 5' # todo: check if this works as expected for system
     commandline_arg = 'echo SOL | gmx_mpi genion -s {} -o {} -p {} -pname NA -nname CL -neutral {}'.format(tpr_file, output_file, topol_file, charge_mod)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(output_file)
+    # todo: may want to uncomment later...
+    #thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
 
 def extract_peptide(thread, settings):
