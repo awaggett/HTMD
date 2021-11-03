@@ -472,7 +472,7 @@ class Adsorption(JobType):
                 # Peptide history attributes handle variable number of peptides
                 thread.history = argparse.Namespace()  # todo: for now, just going to track current peptide w/ thread.peptide
                 thread.history.peptides = []  # list of list of strings; initialized by main.init_threads(), updated by algorithm
-                thread.historty.pep_trajs = [] # list of strings where index corresponds to current peptide
+                thread.history.pep_trajs = [] # list of strings where index corresponds to current peptide
                 thread.history.pep_tops = []
                 thread.history.pep_coords = []
                 thread.history.pep_indices = []
@@ -491,7 +491,7 @@ class Adsorption(JobType):
                 # System history attributes handle variable number of peptides, structures, and replicates
                 thread.history.tops = [[] for i in range(len(thread.peptides))]
                 thread.history.coords = [[] for i in range(len(thread.peptides))]
-                thread.history.indices = [[] for i in rnage(len(thread.peptides))]
+                thread.history.indices = [[] for i in range(len(thread.peptides))]
 
                 # thread.history.trajs = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.xtc files)
                 #thread.history.tops = [[[[] for k in range(settings.num_reps)] for j in range(settings.num_structures)] for i in range(len(thread.peptides))]  # (.top files)
@@ -559,17 +559,19 @@ class Adsorption(JobType):
 
         # If current system is peptide only
         if thread.current_type == 'peptide':
+            print('beginning peptide build')
             # Build peptide in Amber TLEaP. This will add coord to history
             tleap_pdb = utilities.build_peptide(thread, settings)  # todo: may or may not be returning...
-
+            print('built tleap pdb')
             # Make pdb compatible with gromacs
             tleap_pdb_mod = utilities.edit_pdb(thread, settings, tleap_pdb)
-
+            print('pbd made gmx compatible')
             # Convert pdb to gro file
             peptide_gro = utilities.pdb2gmx(thread, settings, tleap_pdb_mod)
-
+            print('pdb converted to gmx')
             # Edit protein .itp file
-            peptide_ff = utilities.clean_peptide_ff(thread, settings, peptide_gro)
+            peptide_ff_in = thread.name + '_' + str(thread.current_peptide) + '.top'
+            peptide_ff = utilities.clean_peptide_ff(thread, settings, peptide_ff_in)
 
             # Edit topology template file to include peptide
             peptide_topology = utilities.write_topology(thread, settings, peptide_ff)
@@ -582,10 +584,10 @@ class Adsorption(JobType):
 
             # Generate ion run file and ionize
             tpr_file = utilities.grompp_ion_runfile(thread, settings, peptide_solvate_gro, peptide_topology)
-            peptide_ion_gro = utilities.genion(thread, settings, tpr_file, peptide_topology)
+            peptide_ion_gro = utilities.genion(thread, settings, tpr_file, peptide_topology, peptide_ff)
 
             # Add empty string to thread.history.index for peptide template
-            thread.history.indices[thread.current_peptide].append('') # todo: actually I don't think I need this anymore?
+            thread.history.pep_indices.append('') # todo: actually I don't think I need this anymore?
 
             # Ready to submit batch job! Add simulation ready files to thread.history namespace
             # Needed - final .gro file, .top file, .ndx file

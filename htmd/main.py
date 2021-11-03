@@ -116,7 +116,7 @@ def init_threads(settings):
 
     # todo: here, you should initialize threads as desired using something like this:
     # partition peptides equally as possible between threads based on the number of nodes and peptides to be processed
-    peptide_groups = [pep_array.tolist() for pep_array in np.array_split(settings.peptides, settings.nodes)]
+    peptide_groups = [pep_array.tolist() for pep_array in [x for x in np.array_split(settings.peptides, settings.nodes) if x.size > 0]
 
     # number of peptide groups is equal to number of nodes
     for i, peptide_group in enumerate(peptide_groups):     # todo: this is arbitrary, for illustration purposes

@@ -157,7 +157,7 @@ def edit_pdb(thread, settings, pdb_in):
 
         # todo: may want to uncomment this if does not work... to add coord file to thread.history.coords
         #thread.history.coords[thread.current_peptide].append(pdb_out.name)
-    return pdb_out
+    return pdb_out.name
 
 def pdb2gmx(thread, settings, pdb_file):
     """
@@ -188,8 +188,9 @@ def pdb2gmx(thread, settings, pdb_file):
     # remove posre.itp - will not be used # todo: in the future may want to allow for option to keep
     #commandline_arg2 = 'rm {}'.format(posre_file)
     #subprocess.run(commandline_arg2, shell=True)
-    os.remove(posre_file)
-
+    # todo: will want to uncomment this...
+    #os.remove(posre_file)
+    print('removing: ', posre_file)
     # todo: can maybe also specify naming of topology file here to add to thread history (and posre to remove?)
     return gro_file
 
@@ -234,7 +235,7 @@ def clean_peptide_ff(thread, settings, protein_ff_in):
     
     # add peptide.itp to history namespace
     # todo: keeping for now because this is the final version
-    thread.history.ff[thread.current_peptide].append(protein_ff_out)
+    #thread.history.ff[thread.current_peptide].append(protein_ff_out)
     
     # remove gromacs generated topology file and posre file
     os.remove(protein_ff_in) # tood: done in pdb2gmx, but could do here instead?
@@ -267,7 +268,7 @@ def write_topology(thread, settings, peptide_ff):
              + "\"\n", "\n", "; Include water topology\n", "#include \"./" + str(water_ff) + "\"\n", "\n",
              "; Include topology for ions\n", "#include \"./" + str(ion_ff) + "\"\n", "\n", "[ system ]\n", "; Name\n",
              str(thread_name) + " " + str(thread_peptide) + "\n", "\n", "[ molecules ]\n", "; Compound        #mols\n",
-             "\n", "Protein              1","\n"]
+             "\n", "Protein            1","\n"]
 
     topol_out = open(thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_topol.top', "a")
     topol_out.writelines(lines)
@@ -362,18 +363,19 @@ def grompp_ion_runfile(thread, settings, gro_file, topol_file):
     #thread.history.runfiles[thread.current_peptide].append(tpr_file)
     return tpr_file
 
-def get_system_charge(thread):
+def get_system_charge(thread, peptide_ff):
     # read charge from peptide .itp file # todo: changed to not use with open, make sure still works
-    itp_file = open(thread.history.ff[thread.current_peptide][-1], 'r')
+    #itp_file = open(thread.history.ff[thread.current_peptide][-1], 'r')
+    itp_file = open(peptide_ff, 'r')
     final_charge = int([line for line in itp_file.readlines() if 'qtot' in line][-1].split()[-1])
     return final_charge
 
-def genion(thread, settings, tpr_file, topol_file):
+def genion(thread, settings, tpr_file, topol_file, protein_ff):
     # todo testing needed
     #tpr_file = thread.history.runfiles[thread.current_peptide][-1]
     output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_ion.gro' # todo: check!
     #topol_file = thread.history.tops[thread.current_peptide][-1]
-    charge = get_system_charge(thread)
+    charge = get_system_charge(thread, protein_ff)
     if charge > 0:
         charge_mod = '-np 5'
     else:  # charge <= 0
@@ -478,7 +480,7 @@ def sample_trajectory(thread, settings, xtc_file, tpr_file):
     # run gromacs command to create coordinate file from randomly selected frame of nvt trajectory
     for i in range(settings.num_structures):
         sel = random.randint(0, nvt_duration)
-        output_file = thread.name + '_' + str(thread.current_peptide) + '_' thread.current_type + '_' + str(i) + '_init + '.gro'
+        output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + '_' + str(i) + '_init.gro'
 
         commandline_arg = 'echo Protein Protein | gmx_mpi trjconv -s {} -f {} -o  -pbc whole -center -dump {}'.format(tpr_file, xtc_file, output_file, sel)
         subprocess.run(commandline_arg, shell=True)
