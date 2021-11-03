@@ -319,9 +319,9 @@ def center_peptide(thread, settings, gro_file):
     #thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
 
-def place_peptide(thread, settings):
+def place_peptide(thread, settings, gro_file):
     # todo: can maybe modify center_peptide to combine these functions
-    gro_file = thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+    #gro_file = thread.history.coords[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
     output_file = name_file(thread) + '_center.gro'
 
     x, y, z = get_surface_size(settings)
@@ -394,15 +394,16 @@ def extract_peptide(thread, settings):
     subprocess.run(commandline_arg, shell=True)
     thread.history.coords[thread.current_peptide].append(output_file)
 
-def translate(thread, settings):
-    # todo: testing needed
-    gro_file = thread.history.coords[thread.current_peptide][-1]
+def translate(thread, settings, gro_file):
+    # todo: may uncomment later...
+    #gro_file = thread.history.coords[thread.current_peptide][-1]
     output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_trans.gro'
     height = settings.initial_height
 
     commandline_arg = 'gmx_mpi editconf -f {} -o {} -translate 0 0 {}'.format(gro_file, output_file, height)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(output_file)
+    #thread.history.coords[thread.current_peptide].append(output_file)
+    return output_file
 
 def combine_pdb(surface, peptide, thread, settings):
     output_file = thread.name + '_' + thread.current_peptide + '_comdbined.pdb'
@@ -411,16 +412,21 @@ def combine_pdb(surface, peptide, thread, settings):
         fout.writelines(open(surface, 'r').readlines()[:-2])
         fout.writelines(open(peptide, 'r').readlines()[4:])
 
-    thread.history.coords[thread.current_peptide].append(output_file)
+
+    # todo: may want to uncomment this later...
+    #thread.history.coords[thread.current_peptide].append(output_file)
     return output_file
 
-def convert_coord(file_in, file_out, thread, settings):
+def convert_coord(thread, settings, file_in, file_out):
+
     commandline_arg = 'gmx_mpi editconf -f {} -o {}'.format(file_in, file_out)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.coords[thread.current_peptide].append(file_out)
+    # todo: may want to uncomment this later...
+    #thread.history.coords[thread.current_peptide].append(file_out)
+    return file_out
 
-def add_to_topology(thread, settings):
-    topology_file = thread.history.tops[thread.current_peptide][-1]
+def add_to_topology(thread, settings, topology_file):
+    #topology_file = thread.history.tops[thread.current_peptide][-1]
     surface_name = settings.surface_name
     output_file = thread.name + '_' + thread.current_peptide + '_' + thread.current_type + '_topol_sys.top'
     surface_topology = settings.surface_ff
@@ -433,23 +439,24 @@ def add_to_topology(thread, settings):
                 fout.write('#include \"./' + surface_topology + '\"\n')
             if i == 15:
                 fout.write(surface_name + '\t\t1\n')
-
-    thread.history.tops[thread.current_peptide].append(output_file)
+    # todo: may want to uncomment later...
+    #thread.history.tops[thread.current_peptide].append(output_file)
     return output_file
 
-def create_index(thread, settings):
+def create_index(thread, settings, gro_file):
     # todo: testing needed. Input file 'q' needed
-    gro_file = thread.history.coords[thread.current_peptide][-1]
+    #gro_file = thread.history.coords[thread.current_peptide][-1]
     index_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + "_init.ndx"
 
     commandline_arg = 'echo q | gmx_mpi make_ndx -f {} -o {}'.format(gro_file, index_file)
     subprocess.run(commandline_arg, shell=True)
-    thread.history.indices[thread.current_peptide].append(index_file)
+    # todo: may want to uncomment later...
+    #thread.history.indices[thread.current_peptide].append(index_file)
     return index_file
 
-def combine_index(thread, settings):
+def combine_index(thread, settings, init_index):
     # todo: more pythonic way of doing this than cat!
-    init_index = thread.history.indices[thread.current_peptide][-1]
+    #init_index = thread.history.indices[thread.current_peptide][-1]
     slab_center = settings.center
     output_file = thread.name + '_' + str(thread.current_peptide) + '_' + thread.current_type + "_system.ndx"
 
@@ -457,15 +464,17 @@ def combine_index(thread, settings):
         fout.write(open(init_index, 'r').read())
         fout.write(open(slab_center, 'r').read())
 
-    thread.history.indices[thread.current_peptide].append(output_file)
+    # todo: may want to uncomment later...
+    #thread.history.indices[thread.current_peptide].append(output_file)
     return output_file
 
-def sample_trajectory(thread, settings):
+def sample_trajectory(thread, settings, xtc_file, tpr_file):
     # get random number between 0 ps and length of nvt trajectory
     nvt_duration = settings.peptide_nvt_nsteps * settings.peptide_nvt_dt * 1000 # picoseconds
-    tpr_file = thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
-    xtc_file = thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+    #tpr_file = thread.history.runfiles[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
+    #xtc_file = thread.history.trajs[thread.current_peptide][thread.current_struct][thread.current_rep][-1]
 
+    coord_files = []
     # run gromacs command to create coordinate file from randomly selected frame of nvt trajectory
     for i in range(settings.num_structures):
         sel = random.randint(0, nvt_duration)
@@ -474,8 +483,9 @@ def sample_trajectory(thread, settings):
         commandline_arg = 'echo Protein Protein | gmx_mpi trjconv -s {} -f {} -o  -pbc whole -center -dump {}'.format(tpr_file, xtc_file, output_file, sel)
         subprocess.run(commandline_arg, shell=True)
 
+        coord_files.append(output_file)
         # add the initial coordinate file to coordinate list for each rep
-        for j in range(settings.num_reps):
-            thread.history.coords[thread.current_peptide][i][j].append(output_file)
-
+        #for j in range(settings.num_reps):
+        #    thread.history.coords[thread.current_peptide][i][j].append(output_file)
+    return coord_files
 
