@@ -571,6 +571,8 @@ class Adsorption(JobType):
             print('pdb converted to gmx')
             # Edit protein .itp file
             peptide_ff_in = thread.name + '_' + str(thread.current_peptide) + '.top'
+            print(os.path.exists(settings.working_directory + peptide_ff_in))
+            print(peptide_ff_in)
             peptide_ff = utilities.clean_peptide_ff(thread, settings, peptide_ff_in)
 
             # Edit topology template file to include peptide
@@ -597,11 +599,14 @@ class Adsorption(JobType):
 
         elif thread.current_type == 'system': # peptide and surface system
 
+            print('SYSTEM STEP')
+
             # Grow peptide box and place at randomly selected x-y coordinates within the range of the surface
             peptide_coord = thread.history.structs[thread.current_peptide][thread.current_struct]
-            place_peptide_gro = utilities.place_peptide(thread, settings)
+            place_peptide_gro = utilities.place_peptide(thread, settings, peptide_coord)
             # todo: this step is done for each rep, but would actually be doing the same thing for each rep (could move this to analysis?)
 
+            print(thread.history.pep_ff, thread.current_peptide)
             # Edit topology template file to include peptide
             peptide_ff = thread.history.pep_ff[thread.current_peptide]
             system_topology = utilities.write_topology(thread, settings, peptide_ff)

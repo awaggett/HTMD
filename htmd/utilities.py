@@ -41,7 +41,7 @@ def get_template(settings, templ):
         return os.path.join(settings.path_to_templates, templ)  # todo: do I need the full path here?
 
 def name_file(thread):
-    return thread.name + '_' + thread.current_type + '_' + str(thread.current_peptide) + '_' + str(thread.current_stuct) + '_' + str(thread.current_rep)
+    return thread.name + '_' + thread.current_type + '_' + str(thread.current_peptide) + '_' + str(thread.current_struct) + '_' + str(thread.current_rep)
 
 def build_peptide(thread, settings):
     """
@@ -179,7 +179,7 @@ def pdb2gmx(thread, settings, pdb_file):
     topol_file = thread.name + '_' + str(thread.current_peptide) + '.top'
     posre_file = thread.name + '_' + str(thread.current_peptide) + '_posre.itp'
     
-    commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -i {} -water none -ter '.format(pdb_file, gro_file, protein_ff, topol_file, posre_file)
+    commandline_arg = 'echo 3 4 | gmx_mpi pdb2gmx -f {} -o {} -ff {} -p {} -i {} -water none -ter'.format(pdb_file, gro_file, protein_ff, topol_file, posre_file)
     subprocess.run(commandline_arg, shell=True)
     # todo: may want to uncomment this later...
     #thread.history.coords[thread.current_peptide].append(gro_file)
@@ -293,7 +293,7 @@ def write_topology(thread, settings, peptide_ff):
 def get_surface_size(settings):
     surface = settings.surface_coord
     dims = open(surface, 'r').readlines()[-1].split()
-    return dims[0], dims[1], dims[2]
+    return float(dims[0]), float(dims[1]), float(dims[2])
     # todo: check this returns the correct thing - could also just pull from .itp file
 
 def center_peptide(thread, settings, gro_file):
@@ -305,14 +305,14 @@ def center_peptide(thread, settings, gro_file):
         x = settings.peptide_box_x
         y = settings.peptide_box_y
         z = settings.peptide_box_z
-        commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} {} {} '.format(gro_file, output_file, x, y, z)
+        commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} {} {}'.format(gro_file, output_file, x, y, z)
     else:  # thread.current_type == 'system'
         x, y, z = get_surface_size(settings)
         z_mod = z - settings.slab_height
         peptide_x = x/2 # todo: this is not compatible of non-cubic boxes
         peptide_y = y/2
         peptide_z = settings.initial_height
-        commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} {} {} -center {} {} {} '.format(gro_file, output_file, x, y, z_mod, peptide_x, peptide_y, peptide_z)
+        commandline_arg = 'gmx_mpi editconf -f {} -o {} -box {} {} {} -center {} {} {}'.format(gro_file, output_file, x, y, z_mod, peptide_x, peptide_y, peptide_z)
 
     #gmx_mpi editconf -f {} -o {} -box {} {} {} '.format(gro_file, output_file, x, y, z)
     subprocess.run(commandline_arg, shell=True)
@@ -326,11 +326,12 @@ def place_peptide(thread, settings, gro_file):
     output_file = name_file(thread) + '_center.gro'
 
     x, y, z = get_surface_size(settings)
-    z_mod = settings.slab_height
+    print('x dim: ', x)
+    z_mod = settings.surface_height
 
     # Randomly select x and y coordinates within the range of the surface dimensions
-    x_com = float(decimal.Decimal(random.randrange(0, x * 100)) / 100)
-    y_com = float(decimal.Decimal(random.randrange(0, y * 100)) / 100)
+    x_com = float(decimal.Decimal(random.randrange(0, round(x,2) * 100)) / 100)
+    y_com = float(decimal.Decimal(random.randrange(0, round(y,2) * 100)) / 100)
     z_com = settings.initial_height
 
     # Place peptide in box: box x-y dimensions equal to surface dimensions, z equal to initial height

@@ -100,7 +100,10 @@ def configure(input_file, user_working_directory=''):
 
         # System NVT template settings
 
-
+        # Debug Settings
+        DEBUG: bool = True 
+       
+ 
     # Import config file line-by-line using exec()
     lines = open(input_file, 'r').readlines()
     line_index = 0

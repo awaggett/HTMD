@@ -116,7 +116,7 @@ def init_threads(settings):
 
     # todo: here, you should initialize threads as desired using something like this:
     # partition peptides equally as possible between threads based on the number of nodes and peptides to be processed
-    peptide_groups = [pep_array.tolist() for pep_array in [x for x in np.array_split(settings.peptides, settings.nodes) if x.size > 0]
+    peptide_groups = [pep_array.tolist() for pep_array in [x for x in np.array_split(settings.peptides, settings.nodes) if x.size > 0]]
 
     # number of peptide groups is equal to number of nodes
     for i, peptide_group in enumerate(peptide_groups):     # todo: this is arbitrary, for illustration purposes
@@ -219,6 +219,11 @@ def main(settings):
         destination = settings.working_directory + '/ion.mdp'
         shutil.copyfile(source, destination)
 
+    if not os.path.exists(settings.working_directory + '/QF_S_Silica_ph7.5_part.gro'):
+       source = settings.path_to_input_files + '/QF_S_Silica_ph7.5_part.gro'
+       destination = settings.working_directory + '/QF_S_Silica_ph7.5_part.gro'
+       shutil.copyfile(source, destination)
+     
 
     # Build or load threads
     allthreads = init_threads(settings)
@@ -233,6 +238,7 @@ def main(settings):
     
     # Initialize threads with first process step
     try:
+        print('FIRST STEP')
         for thread in allthreads:
             # todo: change if not thread.history.traj (instead check if thread.history.peptides matches original thread.peptides?)
             #if not thread.history.trajs:    # if there have been no steps in this thread yet

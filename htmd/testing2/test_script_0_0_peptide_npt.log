@@ -30,7 +30,7 @@ GROMACS:      gmx mdrun, version 2020.5-MODIFIED
 Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
 Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
 Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing2
-Process ID:   16527
+Process ID:   28261
 Command line:
   gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -nsteps 10 -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi -cpo -cpt 1.0 -v
 
@@ -57,7 +57,7 @@ C++ compiler flags: -mavx2 -mfma -fexcess-precision=fast -funroll-all-loops -fop
 
 
 Running on 1 node with total 28 cores, 28 logical cores
-Hardware detected on host n2254.hyak.local (the node of MPI rank 0):
+Hardware detected on host n2250.hyak.local (the node of MPI rank 0):
   CPU info:
     Vendor: Intel
     Brand:  Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
@@ -130,13 +130,13 @@ Input Parameters:
    integrator                     = md
    tinit                          = 0
    dt                             = 0.002
-   nsteps                         = 250000
+   nsteps                         = 5000
    init-step                      = 0
    simulation-part                = 1
    comm-mode                      = Linear
    nstcomm                        = 500
    bd-fric                        = 0
-   ld-seed                        = -79728900
+   ld-seed                        = -285212679
    emtol                          = 10
    emstep                         = 0.01
    niter                          = 20
@@ -301,28 +301,301 @@ Overriding nsteps with value passed on the command line: 10 steps, 0.02 ps
 Changing nstlist from 10 to 100, rlist from 1.3 to 1.422
 
 
-Initializing Domain Decomposition on 3 ranks
-Dynamic load balancing: auto
-Minimum cell size due to atom displacement: 1.151 nm
-NOTE: Periodic molecules are present in this system. Because of this, the domain decomposition algorithm cannot easily determine the minimum cell size that it requires for treating bonded interactions. Instead, domain decomposition will assume that half the non-bonded cut-off will be a suitable lower bound.
-Minimum cell size due to bonded interactions: 0.711 nm
-Scaling the initial minimum size with 1/0.8 (option -dds) = 1.25
-Using 0 separate PME ranks, as there are too few total
- ranks for efficient splitting
-Optimizing the DD grid for 3 cells with a minimum initial size of 1.439 nm
-The maximum allowed number of cells is: X 2 Y 2 Z 2
+Using 1 MPI process
 
--------------------------------------------------------
-Program:     gmx mdrun, version 2020.5-MODIFIED
-Source file: src/gromacs/domdec/domdec.cpp (line 2277)
-MPI rank:    0 (out of 3)
+Non-default thread affinity set, disabling internal thread affinity
 
-Fatal error:
-There is no domain decomposition for 3 ranks that is compatible with the given
-box and a minimum cell size of 1.43875 nm
-Change the number of ranks or mdrun option -rdd or -dds
-Look in the log file for details on the domain decomposition
+Using 1 OpenMP thread 
 
-For more information and tips for troubleshooting, please check the GROMACS
-website at http://www.gromacs.org/Documentation/Errors
--------------------------------------------------------
+System total charge: 0.000
+Will do PME sum in reciprocal space for electrostatic interactions.
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+U. Essmann, L. Perera, M. L. Berkowitz, T. Darden, H. Lee and L. G. Pedersen 
+A smooth particle mesh Ewald method
+J. Chem. Phys. 103 (1995) pp. 8577-8592
+-------- -------- --- Thank You --- -------- --------
+
+Using a Gaussian width (1/beta) of 0.375841 nm for Ewald
+Potential shift: LJ r^-12: 0.000e+00 r^-6: 0.000e+00, Ewald -7.692e-07
+Initialized non-bonded Ewald tables, spacing: 1.01e-03 size: 1287
+
+Generated table with 1211 data points for 1-4 COUL.
+Tabscale = 500 points/nm
+Generated table with 1211 data points for 1-4 LJ6.
+Tabscale = 500 points/nm
+Generated table with 1211 data points for 1-4 LJ12.
+Tabscale = 500 points/nm
+
+Using SIMD 4x8 nonbonded short-range kernels
+
+Using a dual 4x8 pair-list setup updated with dynamic pruning:
+  outer list: updated every 100 steps, buffer 0.122 nm, rlist 1.422 nm
+  inner list: updated every  61 steps, buffer 0.002 nm, rlist 1.302 nm
+At tolerance 0.005 kJ/mol/ps per atom, equivalent classical 1x1 list would be:
+  outer list: updated every 100 steps, buffer 0.382 nm, rlist 1.682 nm
+  inner list: updated every  61 steps, buffer 0.171 nm, rlist 1.471 nm
+
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+G. Bussi, D. Donadio and M. Parrinello
+Canonical sampling through velocity rescaling
+J. Chem. Phys. 126 (2007) pp. 014101
+-------- -------- --- Thank You --- -------- --------
+
+There are: 2621 Atoms
+Center of mass motion removal mode is Linear
+We have the following groups for center of mass motion removal:
+  0:  rest
+Initial temperature: 297.994 K
+
+Started mdrun on rank 0 Mon Nov 15 14:54:58 2021
+
+           Step           Time
+              0        0.00000
+
+   Energies (kJ/mol)
+           Bond          Angle            U-B    Proper Dih.  Improper Dih.
+    2.76201e+03    1.47245e+03    1.06162e+01    6.52988e+01    1.70481e+00
+      CMAP Dih.          LJ-14     Coulomb-14        LJ (SR)   Coulomb (SR)
+   -4.67300e+00    5.30607e+00    1.08275e+02    1.01320e+04   -6.85493e+04
+   Coul. recip.      Potential    Kinetic En.   Total Energy  Conserved En.
+    2.19743e+02   -5.37766e+04    9.75048e+03   -4.40261e+04   -4.39761e+04
+    Temperature Pressure (bar)
+    2.98400e+02   -4.17965e+03
+
+           Step           Time
+             10        0.02000
+
+Writing checkpoint, step 10 at Mon Nov 15 14:54:58 2021
+
+
+
+Reading checkpoint file state.cpt
+  file generated by:     /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+  file generated at:     Mon Nov 15 14:54:58 2021
+
+  GROMACS double prec.:  0
+  simulation part #:     1
+  step:                  10
+  time:                  0.020000
+
+
+
+-----------------------------------------------------------
+Restarting from checkpoint, appending to previous log file.
+
+                  :-) GROMACS - gmx mdrun, 2020.5-MODIFIED (-:
+
+Executable:   /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu/bin/gmx_mpi
+Data prefix:  /gscratch/pfaendtner/jpfaendt/codes/gmx2020.5-cpu
+Working dir:  /gscratch/pfaendtner/awaggett/htmd_test/HTMD/htmd/testing2
+Process ID:   28292
+Command line:
+  gmx_mpi mdrun -ntomp 1 -s test_script_0_0_peptide_npt.tpr -c test_script_0_0_peptide_npt.gro -e test_script_0_0_peptide_npt.edr -x test_script_0_0_peptide_npt.xtc -g test_script_0_0_peptide_npt.log -cpi -cpo -cpt 1.0 -append -v
+
+GROMACS version:    2020.5-MODIFIED
+This program has been built from source code that has been altered and does not match the code released as part of the official GROMACS version 2020.5-MODIFIED. If you did not intend to use an altered GROMACS version, make sure to download an intact source distribution and compile that before proceeding.
+If you have modified the source code, you are strongly encouraged to set your custom version suffix (using -DGMX_VERSION_STRING_OF_FORK) which will can help later with scientific reproducibility but also when reporting bugs.
+Release checksum: 4d9aa1b4e69850bc4583c1983ce2e0e3a88250cafb8f30ab0290b4dd4413a41e
+Computed checksum: b8ddc7ae5452f2f3d2041a95787a485157edafe3542f27b7e83f00237b5b7d77
+Precision:          single
+Memory model:       64 bit
+MPI library:        MPI
+OpenMP support:     enabled (GMX_OPENMP_MAX_THREADS = 64)
+GPU support:        disabled
+SIMD instructions:  AVX2_256
+FFT library:        fftw-3.3.8-sse2-avx-avx2-avx2_128
+RDTSCP usage:       enabled
+TNG support:        enabled
+Hwloc support:      hwloc-1.11.8
+Tracing support:    disabled
+C compiler:         /opt/rh/devtoolset-6/root/usr/bin/cc GNU 6.3.1
+C compiler flags:   -mavx2 -mfma -fexcess-precision=fast -funroll-all-loops -O3 -DNDEBUG
+C++ compiler:       /opt/rh/devtoolset-6/root/usr/bin/c++ GNU 6.3.1
+C++ compiler flags: -mavx2 -mfma -fexcess-precision=fast -funroll-all-loops -fopenmp -O3 -DNDEBUG
+
+Changing nstlist from 10 to 100, rlist from 1.3 to 1.422
+
+Using 1 MPI process
+
+Non-default thread affinity set, disabling internal thread affinity
+
+Using 1 OpenMP thread 
+
+System total charge: 0.000
+Will do PME sum in reciprocal space for electrostatic interactions.
+
+++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
+U. Essmann, L. Perera, M. L. Berkowitz, T. Darden, H. Lee and L. G. Pedersen 
+A smooth particle mesh Ewald method
+J. Chem. Phys. 103 (1995) pp. 8577-8592
+-------- -------- --- Thank You --- -------- --------
+
+Using a Gaussian width (1/beta) of 0.375841 nm for Ewald
+Potential shift: LJ r^-12: 0.000e+00 r^-6: 0.000e+00, Ewald -7.692e-07
+Initialized non-bonded Ewald tables, spacing: 1.01e-03 size: 1287
+
+Generated table with 1211 data points for 1-4 COUL.
+Tabscale = 500 points/nm
+Generated table with 1211 data points for 1-4 LJ6.
+Tabscale = 500 points/nm
+Generated table with 1211 data points for 1-4 LJ12.
+Tabscale = 500 points/nm
+
+Using SIMD 4x8 nonbonded short-range kernels
+
+Using a dual 4x8 pair-list setup updated with dynamic pruning:
+  outer list: updated every 100 steps, buffer 0.122 nm, rlist 1.422 nm
+  inner list: updated every  61 steps, buffer 0.003 nm, rlist 1.303 nm
+At tolerance 0.005 kJ/mol/ps per atom, equivalent classical 1x1 list would be:
+  outer list: updated every 100 steps, buffer 0.383 nm, rlist 1.683 nm
+  inner list: updated every  61 steps, buffer 0.171 nm, rlist 1.471 nm
+
+There are: 2621 Atoms
+Center of mass motion removal mode is Linear
+We have the following groups for center of mass motion removal:
+  0:  rest
+
+Started mdrun on rank 0 Mon Nov 15 14:54:59 2021
+
+           Step           Time
+           5000       10.00000
+
+Writing checkpoint, step 5000 at Mon Nov 15 14:55:34 2021
+
+
+    Ranks Threads  Count      (s)         total sum    %
+-----------------------------------------------------------------------------
+ Neighbor search        1    1          1       0.007          0.018   6.4
+ Force                  1    1         11       0.073          0.175  63.1
+ PME mesh               1    1         11       0.016          0.038  13.7
+ NB X/F buffer ops.     1    1         21       0.000          0.000   0.1
+ Write traj.            1    1          2       0.018          0.044  15.9
+ Update                 1    1         11       0.000          0.000   0.1
+ Rest                                           0.001          0.002   0.6
+-----------------------------------------------------------------------------
+ Total                                          0.115          0.277 100.0
+-----------------------------------------------------------------------------
+ Breakdown of PME mesh computation
+-----------------------------------------------------------------------------
+ PME spread             1    1         11       0.003          0.007   2.4
+ PME gather             1    1         11       0.002          0.005   1.9
+ PME 3D-FFT             1    1         22       0.008          0.020   7.3
+ PME solve Elec         1    1         11       0.002          0.006   2.1
+-----------------------------------------------------------------------------
+
+               Core t (s)   Wall t (s)        (%)
+       Time:        0.115        0.115       99.9
+                 (ns/day)    (hour/ns)
+Performance:       16.477        1.457
+Finished mdrun on rank 0 Mon Nov 15 14:54:58 2021
+
+   Energies (kJ/mol)
+           Bond          Angle            U-B    Proper Dih.  Improper Dih.
+    4.77600e+03    2.46565e+03    4.62571e+01    5.56817e+01    1.04054e+01
+      CMAP Dih.          LJ-14     Coulomb-14        LJ (SR)   Coulomb (SR)
+   -1.72122e+00    1.24003e+01    1.04634e+02    1.10537e+04   -6.58472e+04
+   Coul. recip.      Potential    Kinetic En.   Total Energy  Conserved En.
+    1.35141e+02   -4.71890e+04    9.76937e+03   -3.74197e+04   -4.34832e+04
+    Temperature Pressure (bar)
+    2.98978e+02    7.75700e+01
+
+
+	<======  ###############  ==>
+	<====  A V E R A G E S  ====>
+	<==  ###############  ======>
+
+	Statistics over 5001 steps using 51 frames
+
+   Energies (kJ/mol)
+           Bond          Angle            U-B    Proper Dih.  Improper Dih.
+    4.74941e+03    2.43114e+03    4.91046e+01    6.11964e+01    6.93274e+00
+      CMAP Dih.          LJ-14     Coulomb-14        LJ (SR)   Coulomb (SR)
+   -1.97786e+00    8.26795e+00    8.99132e+01    1.11762e+04   -6.59697e+04
+   Coul. recip.      Potential    Kinetic En.   Total Energy  Conserved En.
+    1.27130e+02   -4.72724e+04    9.65040e+03   -3.76220e+04   -4.35174e+04
+    Temperature Pressure (bar)
+    2.95337e+02   -1.31283e+02
+
+          Box-X          Box-Y          Box-Z
+    2.94594e+00    2.94594e+00    2.94594e+00
+
+   Total Virial (kJ/mol)
+    3.28072e+03   -4.72225e+01    2.29138e+01
+   -4.72253e+01    3.38715e+03    2.10158e+01
+    2.29120e+01    2.10161e+01    3.29850e+03
+
+   Pressure (bar)
+   -8.97605e+01    4.62225e+01   -8.32697e+00
+    4.62262e+01   -2.27073e+02   -4.42375e+01
+   -8.32467e+00   -4.42379e+01   -7.70147e+01
+
+
+	M E G A - F L O P S   A C C O U N T I N G
+
+ NB=Group-cutoff nonbonded kernels    NxN=N-by-N cluster Verlet kernels
+ RF=Reaction-Field  VdW=Van der Waals  QSTab=quadratic-spline table
+ W3=SPC/TIP3p  W4=TIP4p (single or pairs)
+ V&F=Potential and force  V=Potential only  F=Force only
+
+ Computing:                               M-Number         M-Flops  % Flops
+-----------------------------------------------------------------------------
+ Pair Search distance check              85.923144         773.308     0.1
+ NxN Ewald Elec. + LJ [F]              7649.967456      711446.973    56.4
+ NxN Ewald Elec. + LJ [V&F]              77.512144        9844.042     0.8
+ NxN Ewald Elec. [F]                   7229.374560      440991.848    35.0
+ NxN Ewald Elec. [V&F]                   73.221488        6150.605     0.5
+ 1,4 nonbonded interactions               0.234577          21.112     0.0
+ Calc Weights                            39.244233        1412.792     0.1
+ Spread Q Bspline                       837.210304        1674.421     0.1
+ Gather F Bspline                       837.210304        5023.262     0.4
+ 3D-FFT                               10199.707420       81597.659     6.5
+ Solve PME                                7.985600         511.078     0.0
+ Shift-X                                  0.133671           0.802     0.0
+ Bonds                                    8.719277         514.437     0.0
+ Angles                                   4.302242         722.777     0.1
+ Propers                                  0.184667          42.289     0.0
+ Impropers                                0.029946           6.229     0.0
+ Virial                                   1.333000          23.994     0.0
+ Stop-CM                                  0.026210           0.262     0.0
+ P-Coupling                               1.310500           7.863     0.0
+ Calc-Ekin                                2.621000          70.767     0.0
+ CMAP                                     0.004991           8.485     0.0
+ Urey-Bradley                             0.194649          35.621     0.0
+-----------------------------------------------------------------------------
+ Total                                                 1260880.627   100.0
+-----------------------------------------------------------------------------
+
+
+     R E A L   C Y C L E   A N D   T I M E   A C C O U N T I N G
+
+On 1 MPI rank
+
+ Computing:          Num   Num      Call    Wall time         Giga-Cycles
+                     Ranks Threads  Count      (s)         total sum    %
+-----------------------------------------------------------------------------
+ Neighbor search        1    1         51       0.276          0.663   0.8
+ Force                  1    1       4991      28.685         68.845  81.6
+ PME mesh               1    1       4991       6.042         14.501  17.2
+ NB X/F buffer ops.     1    1       9931       0.067          0.162   0.2
+ Write traj.            1    1          1       0.015          0.035   0.0
+ Update                 1    1       4991       0.045          0.107   0.1
+ Rest                                           0.041          0.098   0.1
+-----------------------------------------------------------------------------
+ Total                                         35.171         84.410 100.0
+-----------------------------------------------------------------------------
+ Breakdown of PME mesh computation
+-----------------------------------------------------------------------------
+ PME spread             1    1       4991       1.079          2.591   3.1
+ PME gather             1    1       4991       0.872          2.092   2.5
+ PME 3D-FFT             1    1       9982       3.276          7.863   9.3
+ PME solve Elec         1    1       4991       0.808          1.939   2.3
+-----------------------------------------------------------------------------
+
+               Core t (s)   Wall t (s)        (%)
+       Time:       35.170       35.171      100.0
+                 (ns/day)    (hour/ns)
+Performance:       24.522        0.979
+Finished mdrun on rank 0 Mon Nov 15 14:55:34 2021
+

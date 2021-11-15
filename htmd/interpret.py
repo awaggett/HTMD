@@ -34,6 +34,6 @@ def interpret(thread, allthreads, running, settings):
     jobtype = factory.jobtype_factory(settings.job_type)
 
     jobtype.analyze(thread, settings)                               # analyze just-completed job step
-    termination = jobtype.algorithm(thread, allthreads, settings)   # query algorithm to decide next move (or terminate)
+    termination = jobtype.algorithm(thread, allthreads, running, settings)   # query algorithm to decide next move (or terminate)
     # todo: in the above step, it is going to move the current step to the next and build the next system (will need to shift thread.current_peptide and other props there)
     return termination, running
